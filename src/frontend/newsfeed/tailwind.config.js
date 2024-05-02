@@ -1,6 +1,9 @@
 module.exports = {
-  purge: ['./app/**/*.{js,ts,jsx,tsx}'],
-  darkMode: false,
+  purge: [
+    './app/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@mui/material/**/*.d.ts',
+  ],
+  darkMode: 'class',
   theme: {
     extend: {},
   },
@@ -8,4 +11,6 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  corePlugins: {},
+  prefix: 'tw-',
 }
