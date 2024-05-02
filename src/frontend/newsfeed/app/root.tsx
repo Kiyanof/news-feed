@@ -5,8 +5,22 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import type { LinksFunction } from "@remix-run/node";
+import stylesheet from "../public/css/main.css?url";
+import { StyledEngineProvider, ThemeProvider, createTheme } from "@mui/material";
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesheet }];
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
+
+  const theme = createTheme({
+    typography: {
+      fontFamily: 'Inter, sans-serif',
+    },
+  })
+
   return (
     <html lang="en">
       <head>
@@ -16,7 +30,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            {children}
+          </ThemeProvider>
+        </StyledEngineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
