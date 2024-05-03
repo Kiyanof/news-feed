@@ -2,7 +2,7 @@
 
 import { createContext, useRef } from "react";
 import { Provider, ReactReduxContext } from "react-redux";
-import { makeStore, AppStore } from "../lib/store";
+import { makeStore, AppStore } from "../lib/redux/store";
 
 let globalStore: AppStore | null = null;
 
