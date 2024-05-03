@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import Body from "./Body";
+import StoreProvider from "./StoreProvider";
 
 export const metadata: Metadata = {
   title: "News Feed",
@@ -16,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <StoreProvider>
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+          <Body>
+            {children}
+          </Body>
+      </StoreProvider>
     </html>
   );
 }
