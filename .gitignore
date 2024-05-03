@@ -2,3 +2,5 @@
 /**/public
 /**/test
 /**/coverage
+/**/.env
+/**/logs
