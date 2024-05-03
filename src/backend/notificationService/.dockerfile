@@ -1,5 +1,6 @@
 # Use an official Node.js runtime as the base image
-FROM node:latest
+# TODO: Use a specific version of Node.js
+FROM node:latest 
 
 # Set the working directory in the container to /app
 WORKDIR /app
