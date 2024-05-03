@@ -15,6 +15,7 @@ const config: Config = {
   plugins: [],
   corePlugins: {
     preflight: false,
-  }
+  },
+  prefix: "tw-",
 };
 export default config;
