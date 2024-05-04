@@ -21,14 +21,15 @@ services:
   #     - redis
   #     - rabbitmq
 
-  # newsfeedService:
-  #   image: your_newsfeed_service_image
-  #   build:./path/to/newsfeedService
-  #   ports:
-  #     - "8002:8002"
-  #   depends_on:
-  #     - rabbitmq
-  #     - qdrant
+  newsfeedService:
+    container_name: newsfeed
+    image: newsfeed-service
+    build: ./backend/newsFeedService
+    ports:
+      - "8002:8002"
+    depends_on:
+      - rabbitmq
+      - qdrant
 
   # contentService:
   #   image: your_content_service_image
@@ -42,7 +43,7 @@ services:
   notificationService:
     container_name: notification
     image: notification-service
-    build: ./backend/notification-service
+    build: ./backend/notificationService
     ports:
       - "8004:8004"
     depends_on:
