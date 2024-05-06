@@ -1,0 +1,20 @@
+const QDRANT_CONFIG = {
+    PROTOCOL: 'http',
+    HOST: 'localhost',
+    PORT: 6333,
+
+    DEFAULTS: {
+        RELEVANT_DISTANCE: 0.5,
+        RELEVANT_TOP: 10,
+        RELEVANT_SOME_COUNT: 5,
+
+        CHUNK_SIZE: 10,
+        BATCH_SIZE: 10,
+
+        BLUEBIRD_CONCURRENCY: 5
+    }
+}
+
+export const QDRANT_URL = `${QDRANT_CONFIG.PROTOCOL}://${QDRANT_CONFIG.HOST}:${QDRANT_CONFIG.PORT}`
+export const DEFAULTS = QDRANT_CONFIG.DEFAULTS
+export default QDRANT_CONFIG;
