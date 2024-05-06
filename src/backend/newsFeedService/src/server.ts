@@ -2,7 +2,9 @@ import express from 'express';
 import 'dotenv/config';
 import cors from 'cors'
 import logger from './config/logger';
+import appInit from './init/init';
 // import upConsumers from './utils/broker/consumer/RPCs';
+
 
 const app = express();
 
@@ -28,6 +30,11 @@ app.get('/ping', (_req, res) => {
  * Consumers
  */
 // upConsumers();
+
+/**
+ * Initialize
+ */
+appInit();
 
 app.listen(appParams.port, () => {
     logger.info(`Server is running on port ${appParams.port}`);
