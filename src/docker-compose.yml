@@ -92,3 +92,12 @@ services:
       - "6333:6333"
     volumes:
       - ./qdrant_data:/qdrant/storage
+
+  # chroma:
+  #   image: chroma-image
+  #   build: ./backend/chromaService
+  #   ports:
+  #     - "8005:8005"
+  #   depends_on:
+  #     - rabbitmq
+  #     - qdrant
