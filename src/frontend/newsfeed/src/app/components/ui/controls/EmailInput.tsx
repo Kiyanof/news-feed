@@ -64,7 +64,7 @@ const EmailInput: React.FC<EmailInputProps> = ({...props}) => {
                 placeholder="Enter your email address"
                 startAdornment={
                     <InputAdornment position="start">
-                        <EmailIcon className="tw-text-teal-500"/>
+                        <EmailIcon className="tw-text-teal-600"/>
                     </InputAdornment>
                 }
                 endAdornment={

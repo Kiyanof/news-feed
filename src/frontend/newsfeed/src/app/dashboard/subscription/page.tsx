@@ -15,6 +15,7 @@ const Page = () => {
         <Container>
             <Paper elevation={0}>
                 <CardHeader
+                    className="tw-bg-slate-50"
                     avatar={
                         <Avatar className="tw-bg-teal-700">
                             {defaultProps.avatar}
@@ -35,7 +36,7 @@ const Page = () => {
                 <CardContent>
                     <Container className="tw-my-5">
                         <Stack direction={{sm: 'column', md: 'row'}} gap={3}>
-                            <Divider flexItem orientation="vertical" variant="middle" className="tw-border-teal-500 tw-border-2"/>
+                            <Divider flexItem orientation="vertical" variant="middle" className="tw-border-teal-600 tw-border-2"/>
                             <Container>
                                 <SubscriptionForm />
                             </Container>

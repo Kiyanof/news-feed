@@ -20,7 +20,7 @@ const SubscriptionForm = () => {
                             <EmailInput />
                             <Box>
                                 <Stack className={`tw-items-center`} direction={{sm: 'row'}} gap={2}>
-                                    <Icon className={`tw-text-teal-500`}>
+                                    <Icon className={`tw-text-teal-600`}>
                                         <EditCalendarIcon />
                                     </Icon>
                                     <Toggles

@@ -36,6 +36,7 @@ const NewsCard: React.FC<NewsCardProps> = ({...props}) => {
     return (
         <Card className={`tw-w-[450px] ${props.index % 2 ? 'hover:tw-translate-x-1': 'hover:-tw-translate-x-1'}  tw-cursor-pointer tw-transition-all tw-ease-in tw-duration-200`}>
             <CardHeader
+                className="tw-bg-slate-100"
                 avatar={
                     <Avatar className={`tw-bg-teal-700`}>
                         <Newspaper />
@@ -53,7 +54,7 @@ const NewsCard: React.FC<NewsCardProps> = ({...props}) => {
                 }
                 action={
                     <CardActions>
-                        <IconButton>
+                        <IconButton className="tw-text-slate-500">
                             <MoreVertIcon />
                         </IconButton>
                     </CardActions>
@@ -79,11 +80,11 @@ const NewsCard: React.FC<NewsCardProps> = ({...props}) => {
                                         return (
                                             <Chip 
                                                 variant="outlined"
-                                                className="tw-border-violet-300 tw-bg-transparent"
+                                                className="tw-border-emerald-600 tw-bg-transparent"
                                                 key={index}
                                                 label={
                                                     <Stack direction={'row'} alignItems={'center'} gap={1}>
-                                                        <Icon className={`tw-text-indigo-900`}>
+                                                        <Icon className={`tw-text-teal-800`}>
                                                             {item.icon}
                                                         </Icon>
                                                         <Typography variant={'caption'}>

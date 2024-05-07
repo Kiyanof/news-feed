@@ -11,8 +11,9 @@ const Newspapers = () => {
         <Container>
             <Paper elevation={0}>
                 <CardHeader
+                    className="tw-bg-slate-50"
                     avatar={
-                        <Avatar className={`tw-bg-teal-600`}>
+                        <Avatar className={`tw-bg-emerald-800`}>
                             <FeedIcon />
                         </Avatar>
                     }
