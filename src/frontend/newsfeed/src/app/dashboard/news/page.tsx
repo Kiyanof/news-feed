@@ -1,8 +1,9 @@
+"use client"
+import withAuth from "@/app/components/HOC/WithAuth"
 import Newspapers from "@/app/components/layout/Newspapers"
 import { Container } from "@mui/material"
-import exp from "constants"
 
-const Page = () => {
+const PageContent = ({...props}) => {
 
     return (
         <Container>
@@ -11,4 +12,5 @@ const Page = () => {
     )
 }
 
-export default Page;
+const Page = withAuth(PageContent)
+export default Page
