@@ -1,6 +1,9 @@
+"use client"
 import { Lock as LockIcon, Login as LoginIcon } from "@mui/icons-material";
-import { Avatar, Card, CardActions, CardContent, CardHeader, Container, Divider, IconButton, Stack, Typography } from "@mui/material";
+import { Alert, AlertColor, Avatar, Card, CardActions, CardContent, CardHeader, Container, Divider, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
 import EmailInput from "../../ui/controls/EmailInput";
+import { useState } from "react";
+import { signin } from "@/app/API/route/auth";
 
 interface SigninFormProps {
 
@@ -8,10 +11,42 @@ interface SigninFormProps {
 
 const SigninForm: React.FC<SigninFormProps> = () => {
 
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<boolean>(false)
+    const [message, setMessage] = useState<string>('')
+    const [messageSeverity, setMessageSeverity] = useState<AlertColor | undefined>(undefined)
+
     const params = {
         title: "Authentication",
         subtitle: "Sign in to your account",
         icon: LockIcon,
+    }
+
+    const handleSubmit = async () => {
+        setLoading(true)
+        const body = {
+            email: ''
+        }
+
+        const response = await signin(body)
+        
+        setTimeout(() => {
+            if(!response){
+                setError(true)
+                setMessageSeverity('error')
+                setMessage("Check your connection...")
+                setLoading(false)
+            } else {
+                setError(false)
+                setMessageSeverity('success')
+                setMessage(response.message)
+                setLoading(false)
+            }
+        }, 2000 )
+    }
+
+    const handleClose = () => {
+        setMessage('')
     }
 
     return (
@@ -33,11 +68,19 @@ const SigninForm: React.FC<SigninFormProps> = () => {
                         }
                     />
                     <Divider />
+                    {
+                        loading && <LinearProgress color="success" className="tw-bg-cyan-50" />
+                    }
                     <CardContent>
+                        <Stack direction={{sm: 'column'}} gap={3}>
+                        {
+                            message && <Alert severity={messageSeverity} onClose={handleClose}>{message}</Alert>
+                        }
                         <EmailInput />
+                        </Stack>
                     </CardContent>
                     <CardActions className="tw-justify-end">
-                        <IconButton color="success">
+                        <IconButton onClick={handleSubmit} color="success">
                             <LoginIcon className="tw-text-teal-600" />
                         </IconButton>
                     </CardActions>
