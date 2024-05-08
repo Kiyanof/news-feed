@@ -20,7 +20,10 @@ const withAuth = (Component: React.ElementType) => {
                 //     },
                 // })
                 // const userData = await response.json();
-                const userData = null
+                const userData = {
+                    id: '1',
+                    email: ''
+                }
 
                 if (!userData) {
                     router.push('/auth');
