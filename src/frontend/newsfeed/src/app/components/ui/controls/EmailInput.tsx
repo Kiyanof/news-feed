@@ -4,7 +4,8 @@ import { FormControl, InputAdornment, InputLabel, OutlinedInput, OutlinedInputPr
 import { FocusEvent, useEffect, useState } from "react"
 
 interface EmailInputProps extends OutlinedInputProps {
-
+    onchange?: (value: string) => void
+    reset?: boolean
 }
 
 enum Color {
@@ -17,7 +18,7 @@ enum Color {
 const EmailInput: React.FC<EmailInputProps> = ({...props}) => {
 
     const [value, setValue] = useState<string>('')
-    const [color, setColor] = useState<Color>(Color.Success)
+    const [color, setColor] = useState<Color>(Color.Error)
     const [isValid, setIsValid] = useState<boolean>(false)
 
     const validateEmail = (value: string) => {
@@ -44,10 +45,20 @@ const EmailInput: React.FC<EmailInputProps> = ({...props}) => {
         }
     }, [isValid])
 
-    const handleOnBlur = (event: FocusEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (props.onchange) props.onchange(value)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [color, props.onchange])
+
+
+    // const handleOnBlur = (event: FocusEvent<HTMLInputElement>) => {
         
-        if (props.onBlur) props.onBlur(event)
-    }
+    //     if (props.onBlur) props.onBlur(event)
+    // }
+
+    useEffect(() => {
+        if(props.reset) setValue('')
+    }, [props.reset])
 
     
 
