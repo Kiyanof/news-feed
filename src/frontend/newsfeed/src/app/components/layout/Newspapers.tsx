@@ -1,11 +1,91 @@
-import fakeNews from "@/test/news/fakeNews";
+"use client"
+// import fakeNews from "@/test/news/fakeNews";
 import { Feed as FeedIcon } from "@mui/icons-material";
-import { Avatar, CardContent, CardHeader, Container, Divider, Pagination, Paper, Stack, Typography } from "@mui/material";
+import { Alert, AlertColor, Avatar, CardContent, CardHeader, CircularProgress, Container, Divider, LinearProgress, Pagination, PaginationClasses, PaginationItemClasses, PaginationProps, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import NewsCard from "../card/NewsCard";
+import { countNews, getNews } from "@/app/API/route/news";
+import { useCallback, useEffect, useState } from "react";
+
+interface INews {
+    title: string;
+    description: string;
+    content: string;
+    author: string;
+    publishedAt: string;
+    category: string;
+    source: string;
+}
 
 const Newspapers = () => {
 
+    const [news, setNews] = useState<INews[]>([])
+    const [newsCount, setNewsCount] = useState<number>(0)
 
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<boolean>(false)
+    const [message, setMessage] = useState<string>('')
+    const [messageSeverity, setMessageSeverity] = useState<AlertColor | undefined>(undefined)
+
+    const memoizedGetNews = useCallback(getNews, [])
+    const memoizedGetNewsCount = useCallback(countNews, [])
+
+    const handlePage = async (pageNumber: number) => {
+        setLoading(true)
+        const params = {
+            page: pageNumber
+        }
+
+        const response = await memoizedGetNews(params)
+        setTimeout(() => {
+            if(!response) {
+                setError(true)
+                setMessageSeverity('error')
+                setMessage("Check your connection...")
+                setLoading(false)
+            } else {
+                setError(false)
+                setLoading(false)
+                setNews(response.data)
+            }
+        }, 2000);
+    }
+
+    const handleCounter = async () => {
+        setLoading(true)
+        const response = await memoizedGetNewsCount()
+        setTimeout(() => {
+            if(!response) {
+                setError(true)
+                setMessageSeverity('error')
+                setMessage("Check your connection...")
+                setLoading(false)
+                setNewsCount(30)
+            } else {
+                setError(false)
+                setNewsCount(response.data.count)
+                setLoading(false)
+            }
+        }, 2000);
+    
+    }
+
+    useEffect(() => {
+        handleCounter()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    useEffect(() => {
+        handlePage(1)
+
+        return () => {
+            setNews([])
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const handleClose = () => {
+        setError(false)
+    }
 
     return (
         <Container>
@@ -33,7 +113,8 @@ const Newspapers = () => {
                     <Stack direction={'column'} gap={4}>
                     <Stack justifyContent={'center'} direction={{sm: 'row'}} gap={2} flexWrap={'wrap'}>
                     {
-                        fakeNews.map((news, index) => {
+                        news.length > 0 ?
+                        news.map((news, index) => {
                             return (
                                 <NewsCard
                                     index={index}
@@ -42,18 +123,30 @@ const Newspapers = () => {
                                     description={news.description}
                                     content={news.content}
                                     author={news.author}
-                                    date={news.date}
+                                    date={news.publishedAt}
                                     category={news.category}
                                     source={news.source}
                                 />
                             )
-                        })
+                        }) 
+                        :
+                        Array.from({length: 2}, (_, index) => (
+                            <Skeleton key={index} variant="rectangular" width={400} height={400} />
+                        ))
                     }
                     </Stack>
-                    <Divider />
+                    <Divider>{
+                        loading && <CircularProgress color="success" className="tw-bg-slate-50"  />
+                    }</Divider>
+                    
+                    {
+                        error && <Alert severity={messageSeverity} onClose={handleClose} >{message}</Alert>
+                    }
                     <Container className="tw-mx-auto tw-w-full">
                         <Stack direction={'row'} justifyContent={'center'}>
-                            <Pagination variant="outlined" count={10} color="standard" />
+                            {
+                            newsCount > 0 ? <Pagination  onChange={(_event, pageNumber) => handlePage(pageNumber)} variant="outlined" count={Math.floor(newsCount / 10)} color={`success` as 'primary'} /> : <Skeleton variant="rectangular" width={400} height={40} />
+                            }
                         </Stack>
                     </Container>
                     </Stack>
