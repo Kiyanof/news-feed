@@ -5,3 +5,5 @@
 /**/.env
 /**/logs
 /**/venv
+/**/qdrant_data
+/**/*.log
