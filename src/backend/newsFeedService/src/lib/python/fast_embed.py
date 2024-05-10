@@ -24,12 +24,14 @@ def generate_embedding(text):
     embeddings_generator = embedding_model.embed(documents)  # reminder this is a generator
     embeddings_list = list(embedding_model.embed(documents))
 
+    # Length of the embeddings = 384
     # The first element is the embedding of the input text
+
     return embeddings_list[0]
 
 if __name__ == "__main__":
     text = sys.argv[1]
-    embedding = generate_embedding(text)
+    embedding = generate_embedding(text).tolist()
     # Restore the original stdout
     sys.stdout = original_stdout
-    print("---start---\n", embedding, "\n---end---", file=sys.stderr)
+    print("---start---\n", embedding, "\n---end---", file=sys.stderr) 

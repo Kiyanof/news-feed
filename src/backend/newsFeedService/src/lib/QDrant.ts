@@ -27,7 +27,7 @@ class QDrantController {
    * @returns {Promise<void>}
    * @type {string}
    */
-  private async createCollection(collection: string, payload: any) {
+  private async createCollection(collection: string, payload: any): Promise<void> {
     // TODO: Change any to a more specific type & add return type
     await axios.post(`${this._url}/collections/${collection}`, payload);
   }
@@ -40,7 +40,7 @@ class QDrantController {
    * @returns {Promise<void>}
    * @type {string}
    */
-  private async addDocument(collection: string, payload: any) {
+  private async addDocument(collection: string, payload: any): Promise<void> {
     // TODO: Change any to a more specific type & add return type
     await axios.post(`${this._url}/collections/${collection}/points`, payload);
   }
@@ -73,7 +73,7 @@ class QDrantController {
     collection: string,
     documentid: string,
     vector: number[]
-  ) {
+  ): Promise<void> {
     const payload = {
       create_collection: {
         vector_size: vector.length,

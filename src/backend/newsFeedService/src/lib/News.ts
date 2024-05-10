@@ -121,7 +121,7 @@ class News {
         logger.debug(`Embedding: ${this._embedding}`);
     }
 
-    private parseStdout(stdout: string) {
+    private static parseStdout(stdout: string) {
         // Extract the output between the delimiters
         const startDelimiter = "---start---\n";
         const endDelimiter = "\n---end---";
@@ -135,7 +135,7 @@ class News {
     /**
      * 
      */
-    private generateEmbeddingWithFastEmbedding(content: string): Promise<Array<Number>> {
+    private static generateEmbeddingWithFastEmbedding(content: string): Promise<Array<Number>> {
         return new Promise((resolve, reject) => {
             exec(`source ${__dirname}/python/venv/bin/activate && python3 ${__dirname}/python/fast_embed.py "${content}"`, (error, _stdout, stderr) => {
                 if (error) {
@@ -148,7 +148,7 @@ class News {
                     // reject(new Error(stderr));
                     // return;
                     // TODO: Fix the TQDM_DISABLE in the python file to prevent this trick
-                    const embedding = this.parseStdout(stderr).split(' ').map(Number);
+                    const embedding = JSON.parse(this.parseStdout(stderr));
                     resolve(embedding);
                 }
             });
@@ -163,10 +163,22 @@ class News {
     public async generateEmbedding(): Promise<Array<Number> | null> {
         logger.info('Generating embedding for news article content');
         const content = this._content;
-        const embedding = await this.generateEmbeddingWithFastEmbedding(content);
+        const embedding = await News.generateEmbeddingWithFastEmbedding(content);
         if(embedding) {
-            logger.debug(`Embedding: ${embedding}`);
+            this._embedding = Float32Array.from(embedding as Array<number>)
+            logger.debug(`Embedding Length: ${embedding.length}`);
             return embedding;
+        }
+        return null
+    }
+
+    public static async generateEmbedding(content: string): Promise<Float32Array | null> {
+        logger.info('Generating embedding for news article content');
+        const embedding = await News.generateEmbeddingWithFastEmbedding(content);
+        if(embedding) {
+            const result = Float32Array.from(embedding as Array<number>)
+            logger.debug(`Embedding Length: ${embedding.length}`);
+            return result;
         }
         return null
     }
@@ -186,7 +198,7 @@ class News {
             if(article) {
                 const content = this.removeHTMLTags(article.content);
                 this._content = content
-                logger.debug(`Whole Content: ${content}`);
+                logger.debug(`Whole Content length: ${content.length}`);
                 return content
             }
             return "";
@@ -221,8 +233,7 @@ class News {
         logger.info('Saving news article to QDrant');
         try {
             const embedding = this._embedding;
-            logger.debug(`Embedding: ${embedding}`);
-            const result = await this._qdrant.addDocument('news', this._embedding, _id);
+            const result = await this._qdrant.addDocument('news', embedding, _id, this._publishedAt ?? new Date())
             logger.info('News article saved to QDrant');
             return result;
         } catch (error) {
@@ -242,6 +253,34 @@ class News {
             return qdrantResult;
         }
         return null;
+    }
+
+    private static async readNews(query: string, frequency: "daily" | "weekly" | "monthly" = 'daily') {
+        logger.info('Reading news...');
+        try {
+            const qdrantController = new QDrantController(QDRANT_URL)
+            const embeddedQuery = await News.generateEmbedding(query);
+            logger.debug(`Embedded Query length: ${embeddedQuery?.length}`)
+            logger.debug(`Embedded Query is array: ${Array.isArray(embeddedQuery)}`)
+            if(!embeddedQuery) throw new Error('Error generating embedding for query');
+            const result = qdrantController.findRelevantDocuments('news', embeddedQuery, 10, frequency);
+            return result;
+        } catch (error) {
+            logger.error(`Error reading news: ${error}`);
+            return null;
+        }
+    }
+
+    public static async readDailyNews(query: string) {
+        return News.readNews(query, 'daily');
+    }
+
+    static readWeeklyNews(query: string) {
+        return News.readNews(query, 'weekly');
+    }
+
+    static readMonthlyNews(query: string) {
+        return News.readNews(query, 'monthly');
     }
 
     /**

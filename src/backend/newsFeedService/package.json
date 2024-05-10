@@ -14,6 +14,7 @@
   "dependencies": {
     "@langchain/community": "^0.0.54",
     "@mozilla/readability": "^0.5.0",
+    "@qdrant/js-client-rest": "^1.9.0",
     "axios": "^1.6.8",
     "bluebird": "^3.7.2",
     "cors": "^2.8.5",
@@ -25,6 +26,7 @@
     "nodemailer": "^6.9.13",
     "openai": "^4.40.2",
     "rabbitmq": "file:../modules/rabbitmq",
+    "uuid": "^9.0.1",
     "winston": "^3.13.0"
   },
   "devDependencies": {

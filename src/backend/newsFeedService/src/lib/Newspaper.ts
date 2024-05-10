@@ -281,11 +281,6 @@ class NewsController {
         }
     }
 
-    private async testFindRelevant() {
-        const testString = "Israel ordered the local offices of Qatar’s Al Jazeera satellite news network to close Sunday, escalating a long-running feud between the broadcaster and Prime Minister Benjamin Netanyahu’s hard-line government as Doha-mediated cease-fire negotiations"
-        // const result = await new QDrantController(QDRANT_URL).findRelevantDocuments('news', )
-    }
-
     async syncNews() {
         logger.debug('syncNews...')
         await this.resetNewsCollection()
