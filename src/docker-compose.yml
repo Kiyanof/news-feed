@@ -1,25 +1,16 @@
 version: '3.8'
 
 services:
-  # userService:
-  #   image: your_user_service_image
-  #   build:./path/to/userService
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-
-  # subscriptionService:
-  #   image: your_subscription_service_image
-  #   build:./path/to/subscriptionService
-  #   ports:
-  #     - "8001:8001"
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
+  userService:
+    container_name: user
+    image: user-service
+    build: ./backend/userService
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
 
   newsfeedService:
     container_name: newsfeed
@@ -30,6 +21,7 @@ services:
     depends_on:
       - rabbitmq
       - qdrant
+      - mongo
 
   # contentService:
   #   image: your_content_service_image
@@ -49,26 +41,23 @@ services:
     depends_on:
       - rabbitmq
 
-  # apiGatewayService:
-  #   image: your_api_gateway_service_image
-  #   build:./path/to/apiGatewayService
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - userService
-  #     - subscriptionService
-  #     - newsfeedService
-  #     - contentService
-  #     - notificationService
+  subscriptionService:
+    container_name: subscription
+    image: subscription-service
+    build: ./backend/subscriptionService
+    ports:
+      - "8005:8005"
+    depends_on:
+      - rabbitmq
+      - redis
+      - mongo
 
-  # nginx:
-  #   image: nginx:latest
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     -./nginx.conf:/etc/nginx/nginx.conf
-  #   depends_on:
-  #     - apiGatewayService
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      -./nginx.conf:/etc/nginx/nginx.conf
 
   mongo:
     image: mongo:latest
@@ -93,11 +82,5 @@ services:
     volumes:
       - ./qdrant_data:/qdrant/storage
 
-  # chroma:
-  #   image: chroma-image
-  #   build: ./backend/chromaService
-  #   ports:
-  #     - "8005:8005"
-  #   depends_on:
-  #     - rabbitmq
-  #     - qdrant
+
+networks:
