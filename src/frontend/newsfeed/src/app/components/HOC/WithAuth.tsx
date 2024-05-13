@@ -1,9 +1,9 @@
 "use client"
+import { whoIsMe } from "@/app/API/route/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface IUserData {
-    id: string,
     email: string,
 }
 
@@ -14,27 +14,27 @@ const withAuth = (Component: React.ElementType) => {
         const [data, setData] = useState<IUserData | null>(null)
 
         useEffect(() => {
-            const getUser = async () => {
-                // const response = await fetch('http://localhost:4000/user/me', {
-                //     headers: {
-                //     },
-                // })
-                // const userData = await response.json();
-                const userData = {
-                    id: '1',
-                    email: ''
+            try {
+                const getUser = async () => {
+                    const response = await whoIsMe()
+                    const userData = response ? response.data : null
+    
+                    if (!userData) {
+                        setData(null);
+                        router.push('/auth');
+                    } else {
+                        setData(userData);
+                    }
                 }
-
-                if (!userData) {
-                    router.push('/auth');
-                } else {
-                    setData(userData);
-                }
+    
+                getUser()
+            } catch (error) {
+                setData(null);
+                router.push('/auth');
             }
-            getUser();
         } , [router]);
 
-        return !!data ? <Component data={data} /> : null; // Render whatever you want while the authentication occurs
+        return !!data ? <Component {...data} /> : null; 
     };
 
     return AuthenticatedComponent;
