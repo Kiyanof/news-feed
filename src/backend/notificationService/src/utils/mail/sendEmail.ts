@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 })
 
 
-const sendEmail = async (to: string, subject: string, text: string) => {
+const sendEmail = async ({to, subject, text}:{to: string, subject: string, text: string}): Promise<boolean> => {
     logger.debug(`Sending email to ${to}`)
     const mailOptions = {
         from: EMAIL_CONFIG.AUTH.USERNAME,
