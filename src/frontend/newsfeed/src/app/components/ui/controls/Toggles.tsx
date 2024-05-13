@@ -10,24 +10,30 @@ interface IOption {
 interface TogglesProps extends ToggleButtonGroupProps {
     title: string
     options: Array<IOption>
-    onchange?: (value: string) => void
+    onValueChange?: (value: string) => void
     reset?: boolean
 }
 const Toggles: React.FC<TogglesProps> = ({...props}) => {
 
-    const [currentValue, setCurrentValue] = useState<string | null>("")
+    const [currentValue, setCurrentValue] = useState<string | null>('')
 
     const handleValueChange = (event: React.MouseEvent<HTMLElement>, value: string) => {
         setCurrentValue(value)
     }
 
     useEffect(() => {
-        if (props.onchange && currentValue) props.onchange(currentValue)
-    }, [currentValue, props])
+        if (props.onValueChange && currentValue) props.onValueChange(currentValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentValue, props.onValueChange])
 
     useEffect(() => {
         if(props.reset) setCurrentValue(null)
     }, [props.reset])
+
+    useEffect(() => {
+        if(props.defaultValue) setCurrentValue(props.defaultValue as string)  
+    }, [props.defaultValue])
+
 
     return (
         <ToggleButtonGroup
