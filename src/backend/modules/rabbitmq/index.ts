@@ -137,7 +137,7 @@ class Rabbit {
   }
 
   public async callProcedure(
-    cb: (channel: Channel, { ...props }) => Promise<any>,
+    cb: (channel: Channel, { ...props }: any) => Promise<any>,
     { ...props }
   ) {
     if (this._channel) {
