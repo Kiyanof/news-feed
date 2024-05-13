@@ -26,7 +26,7 @@ const createConsumer = ({ ...props }: ConsumerType) => {
               channel,
               msg,
               `${props.procedureName} replied successfully to user`,
-              ""
+              isSuccessful
             );
           } else {
             Rabbitmq.handleError(
