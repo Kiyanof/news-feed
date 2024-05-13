@@ -284,6 +284,29 @@ class QDrantController {
     }
   }
 
+  deleteOldNews(collection: string) {
+    logger.defaultMeta = { Procedure: "deleteOldNews" };
+    logger.info("Deleting old news...");
+    try {
+      const result = this._client.delete(`${collection}`, JSON.stringify({
+        filter: {
+          should: {
+            "key": "publishedAt",
+            "range": {
+              "lt": +QDRANT_CONFIG.NEWS_EXPIRE
+            }
+          }
+        }
+      }));
+      logger.debug(`Result: ${result}`);
+      return result;
+    } catch (error) {
+      logger.error(`Error deleting old news: ${error}`);
+      return null;
+    }
+  }
+
+
   //   async findSomeRelevantDocuments(
   //     collection: string,
   //     queries: Array<Float32Array>,
