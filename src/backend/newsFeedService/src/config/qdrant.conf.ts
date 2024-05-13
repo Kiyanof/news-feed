@@ -20,6 +20,8 @@ const QDRANT_CONFIG = {
 
         BLUEBIRD_CONCURRENCY: 5
     }
+    ,
+    NEWS_EXPIRE: process.env.NEWS_EXPIRE || 60 * 60 * 24 * 30, //  30 days
 }
 
 export interface QDrantControllerDefaults {
