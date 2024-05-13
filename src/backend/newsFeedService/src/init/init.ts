@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import logger from "../config/logger"
 import NewsController from "../lib/Newspaper";
 import { MONGO_URI } from "../config/mongo.config";
+import dailyJobs from "src/cronjob/daily";
 
 const newsInit = async () => {
     logger.info('Initializing News Feed Service...');
@@ -32,6 +33,18 @@ const mongoInit = async () => {
     }
 }
 
+const handleCronJobs = () => {
+    logger.info('Initializing cron jobs...')
+    try {
+        logger.debug('Daily cron job initializing...')
+        dailyJobs.start()
+        logger.debug('Daily cron job initialized')
+        
+    } catch (error) {
+        logger.error(`Error initializing cron jobs: ${error}`)
+    }
+}
+
 const handleSignals = () => {
     ['SIGINT', 'SIGTERM', 'SIGQUIT']
     .forEach(signal => process.on(signal, () => {
@@ -47,6 +60,8 @@ const appInit = async () => {
     logger.info('Initializing...');
     await mongoInit()
     await newsInit()
+    
+    handleCronJobs()
 
     handleSignals()
 }
