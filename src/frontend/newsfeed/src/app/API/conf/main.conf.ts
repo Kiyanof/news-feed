@@ -1,8 +1,8 @@
 export const API_MAIN_CONF = {
     PROTOCOL: 'http',
     HOST: 'localhost',
-    PORT: '8080',
-    BASE_PATH: '/api',
+    PORT: '8000',
+    BASE_PATH: '',
 }
 
 export const URLGenerator = (endpoint: string, path: string) => {
