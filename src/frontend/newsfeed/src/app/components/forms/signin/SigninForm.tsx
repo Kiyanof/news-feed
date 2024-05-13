@@ -4,6 +4,11 @@ import { Alert, AlertColor, Avatar, Card, CardActions, CardContent, CardHeader, 
 import EmailInput from "../../ui/controls/EmailInput";
 import { useState } from "react";
 import { signin } from "@/app/API/route/auth";
+import PasswordInput from "../../ui/controls/PasswordInput";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { setEmail, setPassword, subscriptionEmail, subscriptionPassword } from "@/lib/redux/features/subscription/subscriptionSlice";
+import { useRouter } from "next/navigation";
+import { clearUser, setUser } from "@/lib/redux/features/app/appSlice";
 
 interface SigninFormProps {
 
@@ -11,10 +16,17 @@ interface SigninFormProps {
 
 const SigninForm: React.FC<SigninFormProps> = () => {
 
+    const router = useRouter()
+
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<boolean>(false)
     const [message, setMessage] = useState<string>('')
     const [messageSeverity, setMessageSeverity] = useState<AlertColor | undefined>(undefined)
+
+    const dispatch = useAppDispatch()
+    
+    const email = useAppSelector(subscriptionEmail)
+    const password = useAppSelector(subscriptionPassword)
 
     const params = {
         title: "Authentication",
@@ -25,7 +37,8 @@ const SigninForm: React.FC<SigninFormProps> = () => {
     const handleSubmit = async () => {
         setLoading(true)
         const body = {
-            email: ''
+            email,
+            password
         }
 
         const response = await signin(body)
@@ -36,17 +49,29 @@ const SigninForm: React.FC<SigninFormProps> = () => {
                 setMessageSeverity('error')
                 setMessage("Check your connection...")
                 setLoading(false)
+                dispatch(clearUser())
             } else {
                 setError(false)
                 setMessageSeverity('success')
                 setMessage(response.message)
                 setLoading(false)
+                console.log({response})
+                dispatch(setUser(response.data.email))
+                router.push('/dashboard/news')
             }
         }, 2000 )
     }
 
     const handleClose = () => {
         setMessage('')
+    }
+
+    const handleEmailChange = (value: string) => {
+        dispatch(setEmail(value))
+    }
+
+    const handlePasswordChange = (value: string) => {
+        dispatch(setPassword(value))
     }
 
     return (
@@ -76,7 +101,8 @@ const SigninForm: React.FC<SigninFormProps> = () => {
                         {
                             message && <Alert severity={messageSeverity} onClose={handleClose}>{message}</Alert>
                         }
-                        <EmailInput />
+                        <EmailInput onValueChange={handleEmailChange}/>
+                        <PasswordInput onValueChange={handlePasswordChange}/>
                         </Stack>
                     </CardContent>
                     <CardActions className="tw-justify-end">
