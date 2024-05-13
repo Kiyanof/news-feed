@@ -1,5 +1,5 @@
 {
-  "name": "content-service",
+  "name": "news-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.10.4",
-    "logger": "file:../../logger"
+    "logger": "file:../../logger",
+    "rabbitmq": "file:../../rabbitmq"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5"
