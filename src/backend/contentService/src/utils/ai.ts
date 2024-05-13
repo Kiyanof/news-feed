@@ -4,7 +4,7 @@ import * as Types from "./types"
 import processUserPromptBody from "./processUserPromptBody"
 import summarizeArticleBody from "./summarizeArticleBody"
 
-export type Response = null | string
+export type Response = null | string | {result: string | null}
 
 export default class Ai {
   private _openAi: OpenAI
@@ -26,10 +26,14 @@ export default class Ai {
     try{
       const body = processUserPromptBody(content)
       const reply = await this.sendPrompt(body)
-      return reply.message.content
+      return {
+        result: reply.message.content
+      }
     } catch (error) {
       logger.error(error)
-      return null
+      return {
+        result: null
+      }
     }
   }
 
@@ -37,10 +41,14 @@ export default class Ai {
     try{
       const body = summarizeArticleBody(contents, keywords)
       const reply = await this.sendPrompt(body)
-      return reply.message.content
+      return {
+        result: reply.message.content
+      }
     } catch (error) {
       logger.error(error)
-      return null
+      return {
+        result: null
+      }
     }
   }
 
