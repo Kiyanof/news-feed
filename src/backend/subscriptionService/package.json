@@ -16,10 +16,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "ioredis": "^5.4.1",
     "logger": "file:../modules/logger",
     "mongoose": "^8.3.3",
     "news-service": "file:../modules/producers/news",
     "node-cron": "^3.0.3",
+    "notification-service": "file:../modules/producers/notification",
     "rabbitmq": "file:../modules/rabbitmq",
     "uuid": "^9.0.1"
   },
