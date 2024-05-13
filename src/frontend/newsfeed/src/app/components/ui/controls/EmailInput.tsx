@@ -4,8 +4,9 @@ import { FormControl, InputAdornment, InputLabel, OutlinedInput, OutlinedInputPr
 import { FocusEvent, useEffect, useState } from "react"
 
 interface EmailInputProps extends OutlinedInputProps {
-    onchange?: (value: string) => void
+    onValueChange?: (value: string) => void
     reset?: boolean
+    defaultValue?: string | null
 }
 
 enum Color {
@@ -46,10 +47,9 @@ const EmailInput: React.FC<EmailInputProps> = ({...props}) => {
     }, [isValid])
 
     useEffect(() => {
-        if (props.onchange) props.onchange(value)
+        if (props.onValueChange) props.onValueChange(value)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [color, props.onchange])
-
+    }, [color, props.onValueChange])
 
     // const handleOnBlur = (event: FocusEvent<HTMLInputElement>) => {
         
@@ -59,6 +59,10 @@ const EmailInput: React.FC<EmailInputProps> = ({...props}) => {
     useEffect(() => {
         if(props.reset) setValue('')
     }, [props.reset])
+
+    useEffect(() => {
+        if(props.defaultValue) setValue(props.defaultValue)
+    }, [props.defaultValue])
 
     
 
