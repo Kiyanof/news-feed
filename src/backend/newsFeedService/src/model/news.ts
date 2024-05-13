@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import MONGO_CONFIG from "src/config/mongo.config";
 
 interface INews {
     [key: string]: any,
@@ -27,6 +28,7 @@ const newsSchema = new mongoose.Schema<INews>({
     source: { type: String, required: false, default: "Unknown"},
     url: { type: String, required: false, default: ""},
     publishedAt: { type: Date, required: false, default: Date.now() },
+    createdAt: { type: Date, required: false, default: Date.now(), expires: +MONGO_CONFIG.NEWS_EXPIRE},
 })
 
 const NewsModel = mongoose.model<INews>('News', newsSchema)
