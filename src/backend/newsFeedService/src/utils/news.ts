@@ -1,5 +1,13 @@
-import NewsModel from "../model/new"
+// import NewsModel from "../model/new"
 
 const handleOldNews = async () => {
-    NewsModel
+    // NewsModel
+}
+
+const readTheseNews = async () => {
+    
+}
+
+export {
+    handleOldNews
 }
