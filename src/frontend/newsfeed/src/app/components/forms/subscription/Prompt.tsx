@@ -1,10 +1,11 @@
 "use client"
-import { Container, FormControl, FormHelperText, InputLabel, TextField, Typography } from "@mui/material"
+import { Container, FormControl, FormHelperText, InputLabel, TextField, TextFieldProps, Typography } from "@mui/material"
 import { ChangeEvent, useEffect, useState } from "react"
 
-interface PromptProps {
+interface PromptProps{
     onchange?: (value: string) => void
     reset?: boolean
+    value?: string | null
 }
 
 const Prompt: React.FC<PromptProps> = ({...props}) => {
@@ -13,7 +14,7 @@ const Prompt: React.FC<PromptProps> = ({...props}) => {
         maxLength: 1000
     }
 
-    const [value, setValue] = useState('')
+    const [value, setValue] = useState(props.value ?? '')
 
     const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = event.target.value
@@ -30,6 +31,10 @@ const Prompt: React.FC<PromptProps> = ({...props}) => {
     useEffect(() => {
         if(props.reset) setValue('')
     }, [props.reset])
+
+    useEffect(() => {
+        setValue(props.value ?? '')
+    }, [props.value])
 
     return (
         <Container>
