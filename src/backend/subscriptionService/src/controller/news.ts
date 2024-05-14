@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import SubscriberModel from "../model/subscriber";
 import logger from "../config/logger";
-import { readNews } from "../utils/subscription";
 import Rabbit from 'rabbitmq'
-import { RABBIT_URL } from "src/config/rabbit.conf";
+import { RABBIT_URL } from "../config/rabbit.conf";
+import { readTheseNews } from "../utils/news";
 
 const listRelatedNews = async (req: Request, res: Response) => {
     const { email } = req.body
@@ -33,8 +33,7 @@ const listRelatedNews = async (req: Request, res: Response) => {
             })
         }
 
-        const wholeNews = await rabbit.callProcedure(readNews, { ids: subscriber.lastRelatedNewsIDs })
-
+        const wholeNews = await rabbit.callProcedure(readTheseNews, { newsID: subscriber.lastRelatedNewsIDs })
         if(!wholeNews){
             logger.error("Failed to read news")
             return res.status(500).json({
@@ -48,7 +47,7 @@ const listRelatedNews = async (req: Request, res: Response) => {
             message: "Success",
             error: [],
             data: {
-                news: wholeNews.results,
+                news: wholeNews,
                 lastNewsSummerized: subscriber.lastNewsSummerized
             }
         })
