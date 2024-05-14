@@ -1,7 +1,8 @@
 import { Router } from "express";
+import { listRelatedNews } from "../controller/news";
 
 const router = Router();
 
-router.post("/news", )
+router.get("/news", listRelatedNews)
 
 export default router;
