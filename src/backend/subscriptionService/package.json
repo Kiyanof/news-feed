@@ -12,7 +12,7 @@
   "author": "Mohammad Kiyan",
   "license": "MIT",
   "dependencies": {
-    "content-service": "file:../modules/producers/news",
+    "content-service": "file:../modules/producers/content",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
