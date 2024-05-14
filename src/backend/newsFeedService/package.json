@@ -18,6 +18,7 @@
     "@types/express-rate-limit": "^6.0.0",
     "axios": "^1.6.8",
     "bluebird": "^3.7.2",
+    "content-service": "file:../modules/producers/content",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -29,6 +30,7 @@
     "nodemailer": "^6.9.13",
     "openai": "^4.40.2",
     "rabbitmq": "file:../modules/rabbitmq",
+    "subscription-service": "file:../modules/producers/subscription",
     "uuid": "^9.0.1",
     "winston": "^3.13.0"
   },
