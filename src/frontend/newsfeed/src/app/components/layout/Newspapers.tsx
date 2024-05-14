@@ -7,6 +7,7 @@ import { countNews, getNews } from "@/app/API/route/news";
 import { useCallback, useEffect, useState } from "react";
 
 interface INews {
+    [key: string]: any;
     title: string;
     description: string;
     content: string;
