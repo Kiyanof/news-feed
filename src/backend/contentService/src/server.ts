@@ -5,10 +5,13 @@ import logger from './config/logger';
 import Ai, {Response} from "./utils/ai"
 // import upConsumers from './utils/broker/consumer/RPCs';
 
+/**
+ * Test the AI module
+ * TODO: Remove this block after testing
+ */
+logger.info("Testing AI module")
 const ai = new Ai()
-
-const response: Promise<Response> = ai.getKeywords("hello world!")
-
+const response: Promise<Response> = ai.getKeywords({content: "hello world!"})
 logger.info(`AI response ::: ${response}`)
 
 const app = express();
