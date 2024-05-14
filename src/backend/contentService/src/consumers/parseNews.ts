@@ -1,8 +1,8 @@
 import { createConsumer } from "rabbitmq"
 import Ai from "../utils/ai"
 const parsePromptConsumer = createConsumer({
-    procedureName: "parsePrompts",
-    defaultQueue: "content/parsePrompts",
+    procedureName: "content/parseNews",
+    defaultQueue: "parseNews",
     callback: new Ai().summarizeArticles
 })
 

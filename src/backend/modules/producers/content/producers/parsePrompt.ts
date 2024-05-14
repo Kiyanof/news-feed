@@ -1,6 +1,6 @@
 import {Channel, createProducer} from 'rabbitmq'
 
-const parsePromptProducer = async (channel: Channel, content: string, callback?: (content: Object) => Promise<any>) => {
+const parsePromptProducer = async (channel: Channel, content: {content: string}, callback?: (content: Object) => Promise<any>) => {
     const producer = createProducer({
         proceduerName: 'content/parsePrompt',
         defaultQueue: 'parsePrompt'
