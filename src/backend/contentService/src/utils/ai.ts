@@ -22,7 +22,7 @@ export default class Ai {
     this._openAi = new OpenAI({ apiKey: this._apiKey});
   }
 
-  public async getKeywords(content: string): Promise<Response> {
+  public async getKeywords({content}:{content: string}): Promise<Response> {
     try{
       const body = processUserPromptBody(content)
       const reply = await this.sendPrompt(body)
