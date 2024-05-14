@@ -263,7 +263,7 @@ class QDrantController {
     logger.defaultMeta = { Procedure: "findRelevantQuerys" };
     logger.info("Finding relevant querys...");
     try {
-      const result = this._client.search(`${collection}`, JSON.stringify({
+      const result = this._client.search(`${collection}`, {
         vector: query,
         filter: {
           should: {
@@ -275,7 +275,7 @@ class QDrantController {
           }
         },
         limit: top,
-      }));
+      });
       logger.debug(`Result: ${result}`);
       return result;
     } catch (error) {
