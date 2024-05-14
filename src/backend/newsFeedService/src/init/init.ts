@@ -3,6 +3,7 @@ import logger from "../config/logger"
 import NewsController from "../lib/Newspaper";
 import { MONGO_URI } from "../config/mongo.config";
 import dailyJobs from "src/cronjob/daily";
+import upConsumers from "src/consumer/RPCs";
 
 const newsInit = async () => {
     logger.info('Initializing News Feed Service...');
@@ -60,9 +61,8 @@ const appInit = async () => {
     logger.info('Initializing...');
     await mongoInit()
     await newsInit()
-    
+    await upConsumers()
     handleCronJobs()
-
     handleSignals()
 }
 
