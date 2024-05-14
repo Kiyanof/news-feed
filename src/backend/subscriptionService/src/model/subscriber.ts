@@ -1,9 +1,9 @@
 import mongoose from 'mongoose'
 
 enum Frequency {
-    daily = 'daily',
-    weekly = 'weekly',
-    monthly = 'monthly'
+    DAILY = 'daily',
+    WEEKLY = 'weekly',
+    MONTHLY = 'monthly'
 }
 
 interface ISubscriber {
