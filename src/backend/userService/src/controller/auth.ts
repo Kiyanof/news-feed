@@ -6,6 +6,9 @@ import UserModel from "../model/user";
 import { setTokenCookie } from "../utils/user";
 import Tokenizer, {Payload} from "../lib/auth/tokenizer";
 import { createWhitelist } from "../utils/whitelist";
+import Rabbit from "rabbitmq";
+import { RABBIT_URL } from "../config/rabbit.config";
+import addSubsciber from "../producer/addSubscriber";
 
 const whoIsMe = async (req: Request, res: Response) => {
   const {fingerPrint} = req.body
@@ -92,7 +95,18 @@ const signup = async (req: Request, res: Response) => {
   const { email, password, frequency, prompt, fingerPrint } = req.body;
 
   try {
+    logger.debug(`Adding subscriber to subscription service...`)
+    const rabbit = Rabbit.new({
+      url: RABBIT_URL
+    })
 
+    if(!await rabbit.isReady()) {throw new Error("RabbitMQ not ready!")}
+    logger.info(`RabbitMQ ready: ${rabbit}`)
+    logger.debug(`adding subscriber to subscription service...`)
+    const addedToSubscription =  await rabbit.callProcedure(addSubsciber, {email, frequency, prompt})
+    if (!addedToSubscription) {throw new Error("Failed to add subscriber to subscription service")}
+    logger.info(`Subscriber added to subscription service: ${addedToSubscription}`)
+    
     logger.debug(`Hashing password...`)
     const hashedPassword = await AppCrypto.hashPassword(password);
     logger.debug(`Password hashed: ${hashedPassword}`)
