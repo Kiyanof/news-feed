@@ -1,10 +1,10 @@
 import doForTheseSubscribers, { Frequency } from "../utils/subscriber";
 import Rabbit from "rabbitmq";
 import { RABBIT_URL } from "../config/rabbit.conf";
-import findSubscriberNews from "../utils/news";
 import sendSubscriberEmail from "../utils/notification";
 import Caching from "../lib/caching/Caching";
 import logger from "../config/logger";
+import { findSubscriberNews } from "../utils/news";
 
 const handleSubscribedUsersFeed = async (frequency: Frequency) => {
     const rabbit = Rabbit.new({
