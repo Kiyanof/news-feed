@@ -1,3 +1,4 @@
 import createLogger from 'logger'
 
-export const logger = createLogger('rabbit-service', 'info', './rabbit-service-log')
+const logger = createLogger('rabbit-service', 'debug', './rabbit-service-log')
+export default logger

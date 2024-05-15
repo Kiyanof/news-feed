@@ -1,5 +1,6 @@
 import { Channel } from "amqplib";
 import Rabbitmq from "../index";
+import logger from "../config/logger";
 
 export interface ConsumerType {
   procedureName: string;
@@ -18,8 +19,10 @@ const createConsumer = ({ ...props }: ConsumerType) => {
     channel.consume(queue, async (msg) => {
       if (msg) {
         try {
+          logger.debug(`Consuming the message...`);
+          logger.debug(`Message received: ${msg.content.toString()}`);
           const content = JSON.parse(msg.content.toString());
-          const isSuccessful = await props.callback(JSON.parse(content));
+          const isSuccessful = await props.callback(content);
 
           if (isSuccessful) {
             Rabbitmq.handleSuccess(

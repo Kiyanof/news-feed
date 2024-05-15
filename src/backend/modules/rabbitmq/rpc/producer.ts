@@ -1,5 +1,5 @@
 import { Channel } from 'amqplib'
-import { logger } from '../config/logger'
+import logger from '../config/logger'
 import { randomUUID } from 'crypto'
 
 export interface ProducerType {

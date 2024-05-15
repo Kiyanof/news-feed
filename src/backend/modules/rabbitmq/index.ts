@@ -1,9 +1,12 @@
-import amqp, { Channel, Message } from "amqplib";
+import * as amqp from "amqplib";
 import createLogger from "../logger";
 import createProducer, { ProducerType } from "./rpc/producer";
 import createConsumer, { ConsumerType } from "./rpc/consumer";
 
 const logger = createLogger("rabbitmq-service");
+
+type Channel = amqp.Channel;
+type Message = amqp.ConsumeMessage;
 
 class Rabbit {
   private static _instance: Rabbit | null = null;
@@ -112,16 +115,18 @@ class Rabbit {
   }
 
   public isReady() {
-    return new Promise((resolve, _reject) => {
+    return new Promise(async (resolve, _reject) => {
       let i = 0;
-      const checkReady = () => {
+      const checkReady = async () => {
         i++;
         if (i < this._max_attemp) {
           logger.debug(`Rabbit: ${i} attemp to checking channel exist`);
           if (this._channel) {
             logger.info(`Rabbit: channel is ready`);
+            
             return resolve(true);
           } else {
+            this._channel = await this.createChannel();
             logger.warn(`Rabbit: channel is not ready...`);
           }
 
@@ -132,7 +137,7 @@ class Rabbit {
         }
       };
 
-      checkReady();
+      await checkReady();
     });
   }
 
@@ -151,8 +156,20 @@ class Rabbit {
         } else throw new Error(`consumer send me error`);
       } catch (error) {
         logger.error(`Rabbit: ${cb.name} procudure error happened: ${error}`);
+        return {
+          state: false,
+          msg: `Rabbit: ${cb.name} procedure error happened`,
+          body: error,
+        };
       }
-    } else logger.warn(`Rabbit: channel not exist!`);
+    } else {
+      logger.warn(`Rabbit: channel not exist!`);
+      return {
+        state: false,
+        msg: `Rabbit: channel not exist!`,
+        body: null,
+      };
+    }
   }
 
   public addToQueue(consumer: (channel: Channel) => any) {
