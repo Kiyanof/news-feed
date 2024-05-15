@@ -1,19 +1,20 @@
-import express from 'express'
+import * as express from 'express'
 import 'dotenv/config'
-import cors from 'cors'
-import cookieParser from 'cookie-parser';
+import cors =  require('cors');
+import cookieParser = require('cookie-parser');
 
 import authRouter from './route/auth'
 import appInit from './init/init'
 
-const app = express()
+const app = express.application
 /**
  * Parameters
  * @param port: number
  */
 const params = {
-    port: process.env.APP_PORT || 3000
+    port: process.env.APP_PORT || 8000
 }
+
 
 /**
  * Middlewares

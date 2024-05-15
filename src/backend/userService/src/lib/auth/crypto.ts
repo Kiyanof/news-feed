@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import HASH_CONFIG from '../../config/hash.config';
 
 abstract class AppCrypto {
