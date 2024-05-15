@@ -1,4 +1,4 @@
-import { Channel, createProducer, ProducerType} from "rabbitmq"
+import { Channel, createProducer} from "rabbitmq"
 export interface EmailNotificationType {
     to: string;
     subject: string;
