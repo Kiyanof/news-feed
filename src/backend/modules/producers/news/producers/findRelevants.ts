@@ -1,5 +1,10 @@
 import {Channel, createProducer} from 'rabbitmq'
-import { Frequency } from 'src/utils/subscriber'
+
+enum Frequency {
+    DAILY = 'daily',
+    WEEKLY = 'weekly',
+    MONTHLY = 'monthly'
+}
 
 const findRelevantsProducer = async (channel: Channel, content:{parsedPrompt: string, frequency: Frequency}, callback?: (content: Object) => Promise<any>) => {
     const producer = createProducer({
