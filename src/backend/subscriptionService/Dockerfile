@@ -19,5 +19,5 @@
     WORKDIR /app
     COPY --from=build /app/dist ./dist
     COPY --from=dependencies /app/node_modules ./node_modules
-    EXPOSE 8003
+    EXPOSE 8004
     CMD ["node", "dist/index.js"]

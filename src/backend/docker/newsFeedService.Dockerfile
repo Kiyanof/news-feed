@@ -1,0 +1,1 @@
+../newsFeedService/Dockerfile

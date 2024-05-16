@@ -2,14 +2,13 @@
     FROM node:14 AS base
     WORKDIR /app
     COPY package*.json ./
-    COPY modules ./modules
     
     # ---- Dependencies ----
     FROM base AS dependencies
-    RUN npm install 
+    RUN npm install --force
     # later use npm CI
     
-    # ---- Build ----
+    # ---- Copy Files/Build ----
     FROM dependencies AS build
     COPY . .
     RUN npm run build
@@ -17,7 +16,8 @@
     # ---- Release ----
     FROM node:14-alpine AS release
     WORKDIR /app
-    COPY --from=build /app/dist ./dist
+    COPY --from=build /app/.next ./.next
+    COPY --from=build /app/public ./public
     COPY --from=dependencies /app/node_modules ./node_modules
-    EXPOSE 8003
-    CMD ["node", "dist/index.js"]
+    EXPOSE 3000
+    CMD ["npm", "start"]
