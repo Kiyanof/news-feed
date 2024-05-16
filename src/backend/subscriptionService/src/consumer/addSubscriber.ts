@@ -1,5 +1,5 @@
 import { createConsumer } from "rabbitmq"
-import { addSubsciber } from "src/utils/subscriber";
+import { addSubsciber } from "../utils/subscriber";
 
 const addSubscriberConsumer = createConsumer({
     procedureName: "subscription/addSubscriber",

@@ -5,7 +5,8 @@
   "main": "server.ts",
   "scripts": {
     "dev": "nodemon",
-    "start": "ts-node server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -21,11 +22,11 @@
     "express-rate-limit": "^7.2.0",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
-    "logger": "file:../modules/logger",
+    "logger": "file:./modules/logger",
     "mongoose": "^8.3.3",
-    "rabbitmq": "file:../modules/rabbitmq",
+    "rabbitmq": "file:./modules/rabbitmq",
     "redis": "^4.6.13",
-    "subscription-service": "file:../modules/producers/subscription",
+    "subscription-service": "file:./modules/producers/subscription",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

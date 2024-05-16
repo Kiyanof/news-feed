@@ -13,7 +13,7 @@ type Response = {
 
 const parsePrompt = async (channel: Channel,{content}: {content: string}): Promise<string | null> => {
     let result = null 
-    await parsePromptProducer(channel, {content}, (response) => {
+    await parsePromptProducer(channel, {content}, (response: Object) => {
         return new Promise((resolve, _reject) => {
             if(response){
                 result = (response as Response).body.result

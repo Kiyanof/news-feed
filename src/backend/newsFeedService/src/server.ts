@@ -9,7 +9,7 @@ import appInit from './init/init';
 const app = express();
 
 const appParams = {
-    port: process.env.PORT || 8002,
+    port: process.env.PORT || 8005,
 }   
 
 /**

@@ -10,7 +10,7 @@ const sendSubscriberEmail = async (channel: Channel, {email, subject, message}:{
             subject,
             message
         },
-        async (_content) => {
+        async (_content: Object) => {
             // Handle notification-service response 
         }
     )

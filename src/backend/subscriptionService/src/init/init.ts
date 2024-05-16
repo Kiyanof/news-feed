@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import logger from "../config/logger";
 import { MONGO_URI } from "../config/mongo.config";
-import dailyJobs from "src/cronjob/daily";
-import weeklyJobs from "src/cronjob/weekly";
-import monthlyJobs from "src/cronjob/monthly";
+import dailyJobs from "../cronjob/daily";
+import weeklyJobs from "../cronjob/weekly";
+import monthlyJobs from "../cronjob/monthly";
+import upConsumers from "../consumer/RPCs";
 
 const initMongoEvents = () => {
   mongoose.connection.on("connected", () =>
@@ -68,6 +69,7 @@ const appInit = async () => {
   logger.info("Initializing...");
   await mongoInit();
   cronJobsInit();
+  await upConsumers()
   handleSignals();
 };
 

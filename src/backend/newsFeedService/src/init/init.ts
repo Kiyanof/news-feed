@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 import logger from "../config/logger"
 import NewsController from "../lib/Newspaper";
 import { MONGO_URI } from "../config/mongo.config";
-import dailyJobs from "src/cronjob/daily";
-import upConsumers from "src/consumer/RPCs";
+import dailyJobs from "../cronjob/daily";
+import upConsumers from "../consumer/RPCs";
 
 const newsInit = async () => {
     logger.info('Initializing News Feed Service...');

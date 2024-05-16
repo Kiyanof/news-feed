@@ -4,7 +4,7 @@ import NewsModel from "../model/news";
 import { QDRANT_URL } from "../config/qdrant.conf";
 import summerizeNews from "../producer/summerizeNews";
 import Rabbit from "rabbitmq";
-import { RABBIT_URL } from "src/config/rabbit.conf";
+import { RABBIT_URL } from "../config/rabbit.conf";
 
 interface INews {
   title: string;

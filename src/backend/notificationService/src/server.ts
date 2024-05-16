@@ -7,7 +7,7 @@ import upConsumers from './utils/broker/consumer/RPCs';
 const app = express();
 
 const appParams = {
-    port: process.env.APP_PORT || 8004,
+    port: process.env.APP_PORT || 8003,
 }   
 
 /**

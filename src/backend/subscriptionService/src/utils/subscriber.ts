@@ -2,7 +2,7 @@ import Rabbit from "rabbitmq";
 import logger from "../config/logger";
 import SubscriberModel from "../model/subscriber";
 import { addKeyword, parsePrompt } from "./subscription";
-import { RABBIT_URL } from "src/config/rabbit.conf";
+import { RABBIT_URL } from "../config/rabbit.conf";
 import { embedding } from "./news";
 
 enum Frequency {

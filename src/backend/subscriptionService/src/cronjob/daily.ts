@@ -1,4 +1,4 @@
-import { Frequency } from "src/utils/subscriber";
+import { Frequency } from "../utils/subscriber";
 import logger from "../config/logger";
 import createCronjob, { Period } from "./base";
 import { handleSubscribedUsersFeed } from "./jobs";

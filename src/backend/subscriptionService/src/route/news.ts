@@ -3,6 +3,6 @@ import { listRelatedNews } from "../controller/news";
 
 const router = Router();
 
-router.get("/news", listRelatedNews)
+router.get("/", listRelatedNews)
 
 export default router;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import MONGO_CONFIG from "src/config/mongo.config";
+import MONGO_CONFIG from "../config/mongo.config";
 
 interface INews {
     [key: string]: any,

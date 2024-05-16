@@ -14,7 +14,7 @@ const handleSignals = () => {
 const appInit = async () => {
   logger.defaultMeta = { label: "init " };
   logger.info("Initializing...");
-  await upConsumers
+  await upConsumers()
   handleSignals();
 };
 
