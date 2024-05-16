@@ -7,3 +7,6 @@
 /**/venv
 /**/qdrant_data
 /**/*.log
+/**/*.js
+/**/dist
+/src/backend/**/modules
