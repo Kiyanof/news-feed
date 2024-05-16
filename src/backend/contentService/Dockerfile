@@ -1,5 +1,5 @@
 # ---- Base Node ----
-    FROM node:14 AS base
+    FROM node:lts AS base
     WORKDIR /app
     COPY package*.json ./
     COPY modules ./modules
@@ -15,9 +15,9 @@
     RUN npm run build
     
     # ---- Release ----
-    FROM node:14-alpine AS release
+    FROM node:lts-alpine AS release
     WORKDIR /app
     COPY --from=build /app/dist ./dist
     COPY --from=dependencies /app/node_modules ./node_modules
     EXPOSE 8002
-    CMD ["node", "dist/index.js"]
+    CMD ["node", "dist/server.js"]

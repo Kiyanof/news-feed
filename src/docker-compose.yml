@@ -7,7 +7,7 @@ services:
     image: newsfeed-application
     build: ./frontend/newsfeed
     ports:
-      - 3000
+      - "3000:3000"
     depends_on:
       - userService
       - subscriptionService
