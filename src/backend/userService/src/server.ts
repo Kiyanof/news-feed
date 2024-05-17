@@ -1,12 +1,13 @@
-import * as express from 'express'
+import express from 'express'
 import 'dotenv/config'
-import cors =  require('cors');
-import cookieParser = require('cookie-parser');
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import authRouter from './route/auth'
 import appInit from './init/init'
+import logger from './config/logger';
 
-const app = express.application
+const app = express()
 /**
  * Parameters
  * @param port: number
@@ -21,7 +22,7 @@ const params = {
  */
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
-    credentials: true
+    credentials: true,
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -34,14 +35,15 @@ app.get('/ping', (_req, res) => {
     res.send('pong')
 })
 
-appInit().then(() => {
-    app.use('/auth', authRouter)
-})
+appInit()
+
+app.use('/auth', authRouter)
+
 
 /**
  * Start server
  */
 
 app.listen(params.port, () => {
-    console.log(`Server is running on port ${params.port}`)
+    logger.info(`Server started on port ${params.port}`)
 })
