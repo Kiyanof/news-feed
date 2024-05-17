@@ -116,6 +116,7 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+      - "8010:8010"
 
   qdrant:
     image: qdrant/qdrant
