@@ -12,24 +12,25 @@ type Response = {
 }
 
 const parsePrompt = async (channel: Channel,{content}: {content: string}): Promise<string | null> => {
-    let result = null 
-    await parsePromptProducer(channel, {content}, (response: Object) => {
+    return await parsePromptProducer(channel, {content}, (response: Object) => {
+        logger.defaultMeta = { label: 'parsePromptProducer', service: 'subscription-service'}
+        logger.debug(`Response: ${JSON.stringify(response)}`)
         return new Promise((resolve, _reject) => {
             if(response){
-                result = (response as Response).body.result
-                resolve(result)
+                logger.info(`Response: ${(response as Response).body.result}`)
+                resolve((response as Response).body.result)
             } else {
+                logger.info('Response: null')
                 resolve(null)
             }
         })
-    })
-    return result
+    }) as string | null
 }
 
 const addKeyword = async (prompt: string): Promise<boolean> => {
     logger.info(`Adding keyword: ${prompt}`)
     try {
-        const keywords = Array.from(new Set(prompt.split(' '))).join(' ')
+        const keywords = Array.from(new Set(prompt.split(' ')))
         for (const keyword of keywords) {
             try {
                 const newKeyword = new KeywordsModel({ title: keyword })

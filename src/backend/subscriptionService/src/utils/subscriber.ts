@@ -143,22 +143,22 @@ const addSubsciber = async ({
       isExist.prompt = prompt
       isExist.frequency = frequency
       isExist.parsedPrompt = parsedPrompt
-      isExist.embeddingParsedPrompt = JSON.stringify(Array.from(embeddingParsedPrompt))
+      isExist.embeddingParsedPrompt = JSON.stringify(Array.from(Object.values(embeddingParsedPrompt)))
       // isExist.lastNewsSummerized = lastNewsSummerized
       // isExist.lastRelatedNewsIDs = lastRelatedNewsIDs
       await isExist.save()
       logger.info(`Subscriber updated successfully`)
     } else {
       logger.debug(`Subscriber does not exist, creating...`)
-      new SubscriberModel({
+      await new SubscriberModel({
         email,
         prompt,
         frequency,
         parsedPrompt,
-        embeddingParsedPrompt: JSON.stringify(Array.from(embeddingParsedPrompt)),
+        embeddingParsedPrompt: JSON.stringify(Array.from(Object.values(embeddingParsedPrompt))),
         // lastNewsSummerized,
         // lastRelatedNewsIDs
-      })
+      }).save()
       logger.debug(`Subscriber created successfully`)
     }
 

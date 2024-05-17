@@ -2,10 +2,15 @@ import { createConsumer } from "rabbitmq"
 import Ai from "../utils/ai"
 import OPENAI_CONFIG from "../config/openai.config";
 
+const summarizeArticles = async (props: {contents: Array<string>, keywords: string}) => {
+    const ai = new Ai(OPENAI_CONFIG.API_KEY)
+    return await ai.summarizeArticles(props)
+}
+
 const parsePromptConsumer = createConsumer({
     procedureName: "content/parseNews",
     defaultQueue: "parseNews",
-    callback: new Ai(OPENAI_CONFIG.API_KEY).summarizeArticles
+    callback: summarizeArticles
 })
 
 export default parsePromptConsumer;

@@ -36,7 +36,7 @@ const createConsumer = ({ ...props }: ConsumerType) => {
               channel,
               msg,
               `${props.procedureName} replied failed to user`,
-              ""
+              isSuccessful
             );
           }
         } catch (error) {

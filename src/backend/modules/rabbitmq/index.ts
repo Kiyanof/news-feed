@@ -126,7 +126,7 @@ class Rabbit {
             
             return resolve(true);
           } else {
-            this._channel = await this.createChannel();
+            // this._channel = await this.createChannel();
             logger.warn(`Rabbit: channel is not ready...`);
           }
 
@@ -150,25 +150,14 @@ class Rabbit {
       try {
         const result = await cb(this._channel, props);
         logger.debug(`Rabbit: CB result = ${JSON.stringify(result)}`);
-        if (result.state) {
-          logger.info(`Rabbit: ${cb.name} procedure called successfully`);
-          return result;
-        } else throw new Error(`consumer send me error`);
+        return result;
       } catch (error) {
         logger.error(`Rabbit: ${cb.name} procudure error happened: ${error}`);
-        return {
-          state: false,
-          msg: `Rabbit: ${cb.name} procedure error happened`,
-          body: error,
-        };
+        return error
       }
     } else {
       logger.warn(`Rabbit: channel not exist!`);
-      return {
-        state: false,
-        msg: `Rabbit: channel not exist!`,
-        body: null,
-      };
+      return null
     }
   }
 

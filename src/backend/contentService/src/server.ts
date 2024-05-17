@@ -2,7 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import cors from 'cors'
 import logger from './config/logger';
-import Ai, {Response} from "./utils/ai"
+import Ai from "./utils/ai"
 import OPENAI_CONFIG from './config/openai.config';
 import appInit from './init/init';
 // import upConsumers from './utils/broker/consumer/RPCs';
@@ -21,8 +21,9 @@ const appParams = {
  */
 logger.info("Testing AI module")
 const ai = new Ai(OPENAI_CONFIG.API_KEY)
-const response: Promise<Response> = ai.getKeywords({content: "hello world!"})
-logger.info(`AI response ::: ${response}`)
+ai.getKeywords({content: "hello world!"}).then((res) => {
+    logger.info(`AI response ::: ${JSON.stringify(res)}`)
+})
 
 process.on("uncaughtException", (err) => {
     logger.error("uncaught exception! Shutting down...");
