@@ -1,8 +1,9 @@
 import {Router} from 'express'
 import { inputValidation as signupInputValidation, isUserExist } from '../middleware/signup'
-import { login, logout, signup, whoIsMe } from '../controller/auth'
+import { changeSubscription, login, logout, signup, whoIsMe } from '../controller/auth'
 import { logRequests } from '../middleware/request'
 import rateLimit from 'express-rate-limit';
+import { authenticate } from '../middleware/authenticate';
 
 const router = Router()
 
@@ -18,8 +19,9 @@ router.use(limiter)
 
 router.post('/subscribe', signupInputValidation, isUserExist, signup)
 router.post('/login', login)
-router.post('/logout', logout)
+router.post('/logout', authenticate, logout)
 
-router.post('/whoisme', whoIsMe) // Becareful about limiting this 
+router.post('/whoisme',authenticate, whoIsMe) // Becareful about limiting this 
+router.put('/change', authenticate, changeSubscription)
 
 export default router
