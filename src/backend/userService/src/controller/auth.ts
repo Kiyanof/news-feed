@@ -4,108 +4,47 @@ import logger from "../config/logger";
 import TOKEN_CONFIG from "../config/token.config";
 import UserModel from "../model/user";
 import { setTokenCookie } from "../utils/user";
-import Tokenizer, {Payload} from "../lib/auth/tokenizer";
+import Tokenizer from "../lib/auth/tokenizer";
 import { createWhitelist } from "../utils/whitelist";
-import Rabbit from "rabbitmq";
-import { RABBIT_URL } from "../config/rabbit.config";
-import addSubsciber from "../producer/addSubscriber";
+import addSubsciberToSubscriptionService from "../producer/addSubscriber";
 
 const whoIsMe = async (req: Request, res: Response) => {
-  const {fingerPrint} = req.body
-  logger.debug(`Verifying token... ${fingerPrint}`) // TODO: add it to verification process
+
+  const {email} = req.body
 
   try {
-    const tokenizer = Tokenizer.new()
-    logger.debug(`Tokenizer: ${tokenizer}`)
-    const whitelist = await createWhitelist(tokenizer)
-    logger.debug(`Whitelist: ${whitelist}`)
-    await whitelist.init()
-    logger.debug(`Whitelist initialized`)
 
-    logger.debug(`Access token: ${req.cookies.access_token}`)
-    logger.debug(`Refresh token: ${req.cookies.refresh_token}`)
-    const payload = await tokenizer.verify(req.cookies.access_token, req.cookies.refresh_token)
-    if(!payload) {
-      return res.status(401).json({
-        message: "Unauthorized",
-        error: ["token"],
-        data: null,
-      });
-    }
-
-    if('accessToken' in payload && 'refreshToken' in payload) {
-      const {accessToken, refreshToken} = payload
-      const response = setTokenCookie(res, payload)
-
-      if(!accessToken || !refreshToken) {
-        await whitelist.destroy()
-        throw new Error("Invalid token generated!")
-      }
-
-      const payloadDate = await tokenizer.verify(accessToken, refreshToken) as Payload
-      if(!payloadDate) {
-        await whitelist.destroy()
-        throw new Error("Invalid token generated verification!")
-      }
-
-      const userInformation = await UserModel.findOne({email: payloadDate.email})
+      const userInformation = await UserModel.findOne({email})
       if(!userInformation) {
-        await whitelist.destroy()
         throw new Error("User not found!")
       }
 
-      await whitelist.destroy()
-      return response.status(200).json({
+      return res.status(200).json({
         message: "Token verified",
         error: null,
         data: {
-          email: payloadDate.email,
+          email: userInformation.email,
           frequency: userInformation.frequency,
           prompt: userInformation.prompt,
         },
       });
     }
-
-    const userInformation = await UserModel.findOne({email: payload.email})
-      if(!userInformation) {
-        await whitelist.destroy()
-        throw new Error("User not found!")
-      }
-    await whitelist.destroy()
-    return res.status(200).json({
-      message: "Token verified",
-      error: null,
-      data: {
-        email: payload.email,
-        frequency: userInformation.frequency,
-        prompt: userInformation.prompt,
-      },
-    });  
-  } catch (error) {
-    logger.error(`Error verifying token: ${error}`);
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-      data: null,
-    });
-  }
+    catch (error) {
+      logger.error(`Error verifying token: ${error}`);
+      return res.status(500).json({
+        message: "Internal server error",
+        error: error.message,
+        data: null,
+      });
+    }
 }
 
 const signup = async (req: Request, res: Response) => {
   const { email, password, frequency, prompt, fingerPrint } = req.body;
 
   try {
-    logger.debug(`Adding subscriber to subscription service...`)
-    const rabbit = Rabbit.new({
-      url: RABBIT_URL
-    })
-
-    if(!await rabbit.isReady()) {throw new Error("RabbitMQ not ready!")}
-    logger.info(`RabbitMQ ready: ${rabbit}`)
-    logger.debug(`adding subscriber to subscription service...`)
-    const addedToSubscription =  await rabbit.callProcedure(addSubsciber, {email, frequency, prompt})
-    if (!addedToSubscription) {throw new Error("Failed to add subscriber to subscription service")}
-    logger.info(`Subscriber added to subscription service: ${addedToSubscription}`)
+    const isAdded = await addSubsciberToSubscriptionService(email, frequency, prompt)
+    if(!isAdded) {throw new Error("Failed to add subscriber to subscription service")}
     
     logger.debug(`Hashing password...`)
     const hashedPassword = await AppCrypto.hashPassword(password);
@@ -117,15 +56,8 @@ const signup = async (req: Request, res: Response) => {
       prompt,
     }).save();
     logger.debug(`New user created: ${newUser}`)
-    if (!newUser) {
-      logger.warn(`Failed to create user: ${newUser}`)
+    if (!newUser) {throw new Error("Failed to create user")}
 
-      return res.status(500).json({
-        message: "Internal server error",
-        error: ["user"],
-        data: null,
-      });
-    }
     const tokenizer = Tokenizer.new()
     const whitelist = await createWhitelist(tokenizer)
     await whitelist.init()
@@ -243,8 +175,9 @@ const logout = async (req: Request, res: Response) => {
   const { email } = req.body;
 
   try {
+    logger.debug(`Email: ${email}`)
     const user = await UserModel.findOne({ email });
-    if (!user) {
+    if (user) {
       const tokenizer = Tokenizer.new()
       const whitelist = await createWhitelist(tokenizer)
       await whitelist.init()
@@ -277,4 +210,42 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
-export { signup, whoIsMe, login, logout };
+const changeSubscription = async (req: Request, res: Response) => {
+  const { email, frequency, prompt } = req.body;
+
+  try {
+
+    const isChanged = await addSubsciberToSubscriptionService(email, frequency, prompt);
+    if (!isChanged) {throw new Error("Failed to change user subscription");}
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email },
+      { frequency, prompt },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      throw new Error("Failed to update user");
+    }
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      error: null,
+      data: {
+        email: updatedUser.email,
+        frequency: updatedUser.frequency,
+        prompt: updatedUser.prompt,
+      },
+    });
+
+  } catch (error) {
+    logger.error(`Error updating user: ${error}`);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+      data: null,
+    });
+  }
+}
+
+export { signup, whoIsMe, login, logout, changeSubscription };
