@@ -9,6 +9,6 @@ export const SUBSCRIBE_CONFIG = {
     changeSubscription: {
         endpoint: "/auth",
         method: axios.put,
-        path: "/subscribe"
+        path: "/change"
     }
 }
