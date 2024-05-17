@@ -1,5 +1,7 @@
 import { addSubscriberProducer } from "subscription-service"
-import { Channel } from "rabbitmq"
+import Rabbit, { Channel } from "rabbitmq"
+import logger from "../config/logger"
+import { RABBIT_URL } from "../config/rabbit.config"
 
 interface Response {
     state: boolean,
@@ -28,4 +30,24 @@ const addSubsciber = async (channel: Channel, subscriber:{email: string, frequen
     return result
 }
 
-export default addSubsciber
+const addSubsciberToSubscriptionService = async (email: string, frequency: Frequency, prompt: string): Promise<boolean> => {
+    try {
+        logger.debug(`Change subscriber to subscription service...`)
+    const rabbit = Rabbit.new({
+      url: RABBIT_URL
+    })
+
+    if(!await rabbit.isReady()) {throw new Error("RabbitMQ not ready!")}
+    logger.info(`RabbitMQ ready: ${rabbit}`)
+    logger.debug(`Change subscriber to subscription service...`)
+    const addedToSubscription =  await rabbit.callProcedure(addSubsciber, {email, frequency, prompt})
+    if (!addedToSubscription) {throw new Error("Failed to change subscriber to subscription service")}
+    logger.info(`Change added to subscription service: ${addedToSubscription}`)
+    return true
+    } catch (error) {
+        logger.error(`Error changing subscriber: ${error}`)
+        return false
+    }
+}
+
+export default addSubsciberToSubscriptionService
