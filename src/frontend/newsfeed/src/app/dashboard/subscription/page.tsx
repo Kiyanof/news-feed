@@ -35,7 +35,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const Page = () => {
   const params = {
@@ -45,6 +45,8 @@ const Page = () => {
   const [defaultEmail, setDefaultEmail] = useState<string | null>("");
   const [defaultFrequency, setDefaultFrequency] = useState<string | null>("");
   const [defaultPrompt, setDefaultPrompt] = useState<string | null>("");
+
+  const [needRefresh, setNeedRefresh] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean | null>(false);
   const [error, setError] = useState<boolean | null>(false);
@@ -105,24 +107,25 @@ const Page = () => {
         setMessageSeverity(hasError ? "error" : "success");
         setMessage(response.message);
         setLoading(false);
+        setNeedRefresh(true)
       }
     }, 2000);
   };
 
+  const getUser = useCallback(async () => {
+      const response = await whoIsMe();
+      const userData = response ? response.data : null;
+
+      if (userData) {
+        setDefaultEmail(userData.email);
+        setDefaultFrequency(userData.frequency);
+        setDefaultPrompt(userData.prompt);
+        dispatch(setUser(userData.email));
+      }
+  }, [])
+
   useEffect(() => {
     try {
-      const getUser = async () => {
-        const response = await whoIsMe();
-        const userData = response ? response.data : null;
-
-        if (userData) {
-          setDefaultEmail(userData.email);
-          setDefaultFrequency(userData.frequency);
-          setDefaultPrompt(userData.prompt);
-          dispatch(setUser(userData.email));
-        }
-      };
-
       getUser();
     } catch (error) {
       console.log({ error });
@@ -134,6 +137,13 @@ const Page = () => {
       setDefaultPrompt(null);
     }
   }, []);
+
+  useEffect(() => {
+    if (needRefresh) {
+      getUser();
+      setNeedRefresh(false)
+    }
+  }, [needRefresh, getUser])
 
   const handleSubscriptionChange = async () => {
     setError(false);
