@@ -26,8 +26,9 @@ abstract class Newspaper {
   private _ENDPOINT: string;
   private _URL: string;
   protected _query: string;
+  protected _lang: string;
 
-  constructor(API_KEY: string, ENDPOINT: string, URL: string) {
+  constructor(API_KEY: string, ENDPOINT: string, URL: string, LANGUAGE?: string) {
     logger.debug("Newspaper class init...");
 
     this._name = this.constructor.name;
@@ -42,15 +43,17 @@ abstract class Newspaper {
     logger.debug(`URL: ${this._URL}`);
     this._query = "";
     logger.debug(`query: ${this._query}`);
+    this._lang = LANGUAGE ?? "en";
+    logger.debug(`lang: ${this._lang}`);
   }
 
-  public async update(keyword?: string) {
+  public async update(keyword?: string, lang?: string) {
     logger.debug(`Updating ${this._name}...`);
     try {
       if (keyword) {
         this.addQuery(`q=${keyword}`);
       }
-      const url = `${this._URL}${this._query ?? ""}`;
+      const url = `${this._URL}${this._query ?? ""}${lang}`
       logger.debug(`url: ${url}`);
       const response = await axios.get(url);
       logger.debug(`response: ${response}`);
@@ -160,7 +163,7 @@ class Newsdata extends Newspaper {
     for (let i = start; i < end; i++) {
       this.toPage(i !== 0 ? next : undefined);
 
-      const result = (await this.update(keyword)) as INewsdata;
+      const result = (await this.update(keyword, `&language=${this._lang}`)) as INewsdata;
 
       if (!result && i === 0) {
         return {
@@ -243,7 +246,7 @@ class Newsapi extends Newspaper {
       }
 
       for (const keyword of keywords) {
-        const { totalArticles, articles } = (await this.update()) as INewsapi;
+        const { totalArticles, articles } = (await this.update(keyword, `&language=${this._lang}`)) as INewsapi;
 
         if (!totalArticles || !articles) {
           logger.warn(`Not any news found for keyword: ${keyword}`)
@@ -287,7 +290,7 @@ class Gnews extends Newspaper {
       }
 
       for (const keyword of keywords) {
-        const { totalArticles, articles } = (await this.update()) as IGnews;
+        const { totalArticles, articles } = (await this.update(keyword, `&lang=${this._lang}`)) as IGnews;
 
         if (!totalArticles || !articles) {
           logger.warn(`Not any news found for keyword: ${keyword}`)
