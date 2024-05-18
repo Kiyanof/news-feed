@@ -1,7 +1,7 @@
 const QDRANT_CONFIG = {
-    PROTOCOL: 'http',
-    HOST: 'localhost',
-    PORT: 6333,
+    PROTOCOL: process.env.QDRANT_PROTOCOL || 'http',
+    HOST: process.env.QDRANT_HOST || 'localhost',
+    PORT: process.env.QDRANT_PORT || 6333,
 
     DEFAULTS: {
         COLLECTION: {

@@ -104,7 +104,7 @@ class Rabbit {
       this._connection = await amqp.connect(url);
       logger.info(`Connected to RabbitMQ at ${url}`);
     } catch (error) {
-      logger.error(`Failed to connect to RabbitMQ at ${url}`);
+      logger.error(`Failed to connect to RabbitMQ at ${url}, error: ${error}`);
       this._connection = null;
     }
   }

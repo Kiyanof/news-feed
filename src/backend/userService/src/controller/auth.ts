@@ -8,6 +8,19 @@ import Tokenizer from "../lib/auth/tokenizer";
 import { createWhitelist } from "../utils/whitelist";
 import addSubsciberToSubscriptionService from "../producer/addSubscriber";
 
+/**
+ * This controller handles the request to identify a user based on the email provided in the request body.
+ * It queries the UserModel to find a user with the provided email.
+ * If a user is found, it responds with a status of 200 and the user's information in JSON format.
+ * If a user is not found, it throws an error.
+ *
+ * @async
+ * @function
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Promise<Response>} The Express response object.
+ * @throws {Error} If the user is not found.
+ */
 const whoIsMe = async (req: Request, res: Response) => {
 
   const {email} = req.body
@@ -39,10 +52,23 @@ const whoIsMe = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * Signs up a new user.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
+ */
 const signup = async (req: Request, res: Response) => {
   const { email, password, frequency, prompt, fingerPrint } = req.body;
 
   try {
+    /**
+     * Adds a subscriber to the subscription service.
+     * @param {string} email - The email of the subscriber.
+     * @param {string} frequency - The frequency of the subscription.
+     * @param {string} prompt - The prompt for the subscription.
+     * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the operation was successful.
+     */
     const isAdded = await addSubsciberToSubscriptionService(email, frequency, prompt)
     if(!isAdded) {throw new Error("Failed to add subscriber to subscription service")}
     

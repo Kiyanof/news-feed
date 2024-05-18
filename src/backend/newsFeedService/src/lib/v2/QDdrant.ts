@@ -27,7 +27,7 @@ class QDrantController {
 
     this._client = new QdrantClient({
       host: QDRANT_CONFIG.HOST,
-      port: QDRANT_CONFIG.PORT,
+      port: +QDRANT_CONFIG.PORT,
     });
     logger.debug(`Client: ${this._client}`);
 

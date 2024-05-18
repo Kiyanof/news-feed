@@ -14,8 +14,8 @@ import NewsModel from "../model/news";
 import QDrantController from "./v2/QDdrant";
 import { QDRANT_URL } from "../config/qdrant.conf";
 import Rabbit from "rabbitmq";
-import { RABBIT_URL } from "src/config/rabbit.conf";
-import readAllKeywords from "src/producer/readAllKeywords";
+import { RABBIT_URL } from "../config/rabbit.conf";
+import readAllKeywords from "../producer/readAllKeywords";
 
 abstract class Newspaper {
   protected _news: Array<News>;
@@ -28,7 +28,7 @@ abstract class Newspaper {
   protected _query: string;
   protected _lang: string;
 
-  constructor(API_KEY: string, ENDPOINT: string, URL: string, LANGUAGE?: string) {
+  constructor(API_KEY: string, ENDPOINT: string, URL: string, LANGUAGE: string = "en") {
     logger.debug("Newspaper class init...");
 
     this._name = this.constructor.name;
@@ -43,7 +43,7 @@ abstract class Newspaper {
     logger.debug(`URL: ${this._URL}`);
     this._query = "";
     logger.debug(`query: ${this._query}`);
-    this._lang = LANGUAGE ?? "en";
+    this._lang = LANGUAGE;
     logger.debug(`lang: ${this._lang}`);
   }
 
@@ -53,7 +53,7 @@ abstract class Newspaper {
       if (keyword) {
         this.addQuery(`q=${keyword}`);
       }
-      const url = `${this._URL}${this._query ?? ""}${lang}`
+      const url = `${this._URL}${this._query ?? ""}${lang ?? ''}`
       logger.debug(`url: ${url}`);
       const response = await axios.get(url);
       logger.debug(`response: ${response}`);
