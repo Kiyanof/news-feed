@@ -299,11 +299,11 @@ class Tokenizer {
     }
   }
 
-  private async verifyTokenWithWhiteList(token: string): Promise<boolean> {
+  private async verifyTokenWithWhiteList(token: string, type: TokenType): Promise<boolean> {
     logger.debug(`Verifying token with white list...`)
     const jwtid = decode(token, { json: true })?.jti;
     logger.debug(`JWTID: ${jwtid}`)
-    return await this.checkTokenInWhiteList(jwtid ?? '');
+    return await this.checkTokenInWhiteList(`${type}:${jwtid}` ?? '');
   }
 
   private async verifyTokenAndGetPayload(
@@ -327,7 +327,7 @@ class Tokenizer {
         return null;
       }
       logger.debug(`Verifying token with white list...`)
-      const isWhiteListed = await this.verifyTokenWithWhiteList(token);
+      const isWhiteListed = await this.verifyTokenWithWhiteList(token, type);
       logger.debug(`Token verified with white list: ${isWhiteListed}`)
       if (!isWhiteListed) {
         logger.warn(`Token not verified with white list`)
@@ -374,13 +374,13 @@ class Tokenizer {
       logger.debug(`Access token payload: ${accessTokenPayload}`)
       if (accessTokenPayload) {
           const jwtid = decode(accessToken, { json: true })?.jti;
-          this.removeTokenFromWhiteList(jwtid ?? '')
+          this.removeTokenFromWhiteList(`ACCESS:${jwtid}` ?? '')
       }
       const refreshTokenPayload = await this.verifyTokenAndGetPayload(refreshToken, 'REFRESH')
       logger.debug(`Refresh token payload: ${refreshTokenPayload}`)
       if (refreshTokenPayload) {
           const jwtid = decode(refreshToken, {json: true})?.jti
-          this.removeTokenFromWhiteList(jwtid ?? '')
+          this.removeTokenFromWhiteList(`REFRESH:${jwtid}` ?? '')
       }
       return true;
     } catch (error) {
