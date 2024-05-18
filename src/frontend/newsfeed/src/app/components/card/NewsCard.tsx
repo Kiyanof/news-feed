@@ -43,14 +43,18 @@ const NewsCard: React.FC<NewsCardProps> = ({...props}) => {
                     </Avatar>
                 }
                 title={
-                    <Typography variant="h6" component={'h2'}>
-                        {props.title}
-                    </Typography>
+                    <Box className={`tw-max-h-[30px] tw-overflow-clip`}>
+                        <Typography variant="h6" component={'h2'}>
+                            {props.title}
+                        </Typography>
+                    </Box>
                 }
                 subheader={
-                    <Typography variant="caption">
-                        {props.description}
-                    </Typography>
+                    <Box className={`tw-max-h-[40px] tw-overflow-y-auto`}>
+                        <Typography variant="caption">
+                            {props.description}
+                        </Typography>
+                    </Box>
                 }
                 action={
                     <CardActions>
@@ -64,7 +68,7 @@ const NewsCard: React.FC<NewsCardProps> = ({...props}) => {
             <CardContent>
                 <Container className={`tw-px-0`}>
                     <Stack direction={'column'} gap={2}>
-                        <Container className={`tw-px-0`}>
+                        <Container className={`tw-px-0 tw-h-[200px] tw-overflow-y-auto`}>
                             <Typography variant={'body1'}>
                                 {props.content}
                             </Typography>
