@@ -13,7 +13,6 @@ const listRelatedNews = async (req: Request, res: Response) => {
 
     try {
         const subscriber = await SubscriberModel.findOne({ email })
-                                                .select('lastRelatedNewsIDs lastNewsSummerized prompt frequency embeddingParsedPrompt')
 
 
         if(!subscriber){
@@ -40,7 +39,7 @@ const listRelatedNews = async (req: Request, res: Response) => {
 
         logger.debug(`Fetching news for ${email} page ${page}`)
         let newsIDs = subscriber.lastRelatedNewsIDs.slice(skip, skip + pageSize)
-        if(newsIDs.length === 0){
+        if(newsIDs.length === 0 || subscriber.shouldUpdate()){
             logger.warn(`No news found for ${email}`)
             logger.debug("Finding relevants news for subscriber...")
             const result = await rabbit.callProcedure(findSubscriberNews, { prompt: subscriber.prompt, parsedPrompt: subscriber.embeddingParsedPrompt , frequency: subscriber.frequency })
@@ -48,7 +47,6 @@ const listRelatedNews = async (req: Request, res: Response) => {
             if(result && result.state) {
                 logger.info("Relevants news found")
                 logger.debug("Saving relevants news to subscriber")
-                logger.debug(`result: ${JSON.stringify(result)}`)
                 subscriber.lastRelatedNewsIDs = result.body.relevanceNews
                 subscriber.lastNewsSummerized = result.body.summery
                 await subscriber.save()
