@@ -2,7 +2,7 @@
     FROM node:lts AS base
     WORKDIR /app
     COPY package*.json ./
-    COPY modules ./modules
+    COPY ./modules ./modules
     
     # ---- Dependencies ----
     FROM base AS dependencies
