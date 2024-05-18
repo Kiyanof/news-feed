@@ -106,9 +106,9 @@ class Whitelist {
 
   async destroy() {
     logger.debug("Destroying whitelist service...");
-    this._tokenizer.events.off("addToken", this.add);
-    this._tokenizer.events.off("removeToken", this.remove);
-    this._tokenizer.events.off("hasToken", this.has);
+    this._tokenizer.events.removeAllListeners('addToken');
+    this._tokenizer.events.removeAllListeners('removeToken');
+    this._tokenizer.events.removeAllListeners('hasToken');
     logger.info("Whitelist service destroyed");
   }
 }
