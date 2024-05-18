@@ -7,9 +7,14 @@ import { readTheseNews } from "../utils/news";
 
 const listRelatedNews = async (req: Request, res: Response) => {
     const { email } = req.body
+    const page = +(req.query.page || 1)
+    const pageSize = 10 // TODO: Move to config file
+    const skip = (page - 1) * pageSize
 
     try {
-        const subscriber = await SubscriberModel.findOne({ email }).select('lastRelatedNewsIDs lastNewsSummerized')
+        const subscriber = await SubscriberModel.findOne({ email })
+                                                .select('lastRelatedNewsIDs lastNewsSummerized')
+
 
         if(!subscriber){
             logger.warn(`Subscriber with email ${email} not found`)
@@ -33,7 +38,9 @@ const listRelatedNews = async (req: Request, res: Response) => {
             })
         }
 
-        const wholeNews = await rabbit.callProcedure(readTheseNews, { newsID: subscriber.lastRelatedNewsIDs })
+        const newsIDs = subscriber.lastRelatedNewsIDs.slice(skip, skip + pageSize)
+
+        const wholeNews = await rabbit.callProcedure(readTheseNews, { newsID: newsIDs })
         if(!wholeNews){
             logger.error("Failed to read news")
             return res.status(500).json({
@@ -61,6 +68,38 @@ const listRelatedNews = async (req: Request, res: Response) => {
     }
 }
 
+const countRelatedNews = async (req: Request, res: Response) => {
+    const { email } = req.body
+
+    try {
+        const subscriber = await SubscriberModel.findOne({ email }).select('lastRelatedNewsIDs')
+        if (!subscriber) {
+            logger.warn(`Subscriber with email ${email} not found`)
+            return res.status(404).json({
+                message: "Subscriber not found",
+                error: ['Email not found'],
+                data: null
+            })
+        }
+
+        return res.status(200).json({
+            message: "Success",
+            error: [],
+            data: {
+                count: subscriber.lastRelatedNewsIDs.length
+            }
+        })
+    } catch (error) {
+        logger.error(`Failed to count related news for ${email}`)
+        return res.status(500).json({
+            message: "Internal Server Error",
+            error: [`Failed to count related news for ${email}`],
+            data: null
+        })
+    }
+}
+
 export {
-    listRelatedNews
+    listRelatedNews,
+    countRelatedNews
 }

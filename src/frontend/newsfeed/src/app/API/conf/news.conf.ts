@@ -2,11 +2,12 @@ import axios from "axios";
 
 export const NEWS_CONFIG = {
     getNews: {
-        endpoint: "/news",
+        endpoint: "/api/news",
         method: axios.get,
+        path: ""
     },
     countNews: {
-        endpoint: "/news",
+        endpoint: "/api/news",
         method: axios.get,
         path: "/count"
     }

@@ -21,6 +21,7 @@ const Newspapers = () => {
 
     const [news, setNews] = useState<INews[]>([])
     const [newsCount, setNewsCount] = useState<number>(0)
+    const [summery, setSummery] = useState<string>('')
 
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<boolean>(false)
@@ -37,49 +38,57 @@ const Newspapers = () => {
         }
 
         const response = await memoizedGetNews(params)
-        setTimeout(() => {
             if(!response) {
                 setError(true)
                 setMessageSeverity('error')
                 setMessage("Check your connection...")
                 setLoading(false)
             } else {
-                setError(false)
+                const news = response.data.news
+                const summery = response.data.lastNewsSummerized
+                if(news.length === 0) {
+                    setError(true)
+                    setMessageSeverity('warning')
+                    setMessage("No news available")
+                } else {
+                    setError(false)
+                }
                 setLoading(false)
-                setNews(response.data)
+                setNews(response.data.news)
+                setSummery(response.data.lastNewsSummerized)
             }
-        }, 2000);
     }
 
     const handleCounter = async () => {
         setLoading(true)
         const response = await memoizedGetNewsCount()
-        setTimeout(() => {
             if(!response) {
                 setError(true)
                 setMessageSeverity('error')
                 setMessage("Check your connection...")
                 setLoading(false)
-                setNewsCount(30)
+                setNewsCount(0)
             } else {
-                setError(false)
+                const count = response.data.count
+                if(count === 0) {
+                    setError(true)
+                    setMessageSeverity('warning')
+                    setMessage("No news available")
+                } else {
+                    setError(false)
+                }
                 setNewsCount(response.data.count)
                 setLoading(false)
             }
-        }, 2000);
-    
     }
 
     useEffect(() => {
         handleCounter()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    useEffect(() => {
         handlePage(1)
 
         return () => {
             setNews([])
+            setNewsCount(0)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -146,7 +155,7 @@ const Newspapers = () => {
                     <Container className="tw-mx-auto tw-w-full">
                         <Stack direction={'row'} justifyContent={'center'}>
                             {
-                            newsCount > 0 ? <Pagination  onChange={(_event, pageNumber) => handlePage(pageNumber)} variant="outlined" count={Math.floor(newsCount / 10)} color={`success` as 'primary'} /> : <Skeleton variant="rectangular" width={400} height={40} />
+                            newsCount >= 0 ? <Pagination  onChange={(_event, pageNumber) => handlePage(pageNumber)} variant="outlined" count={Math.floor(newsCount / 10)} color={`success` as 'primary'} /> : <Skeleton variant="rectangular" width={400} height={40} />
                             }
                         </Stack>
                     </Container>

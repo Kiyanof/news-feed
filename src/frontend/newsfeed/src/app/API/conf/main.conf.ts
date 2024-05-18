@@ -5,6 +5,6 @@ export const API_MAIN_CONF = {
     BASE_PATH: '',
 }
 
-export const URLGenerator = (endpoint: string, path: string) => {
-    return `${API_MAIN_CONF.PROTOCOL}://${API_MAIN_CONF.HOST}:${API_MAIN_CONF.PORT}${API_MAIN_CONF.BASE_PATH}${endpoint}${path}`;
+export const URLGenerator = (endpoint: string, path: string, PORT: string = API_MAIN_CONF.PORT) => {
+    return `${API_MAIN_CONF.PROTOCOL}://${API_MAIN_CONF.HOST}:${PORT}${API_MAIN_CONF.BASE_PATH}${endpoint}${path}`;
 }
