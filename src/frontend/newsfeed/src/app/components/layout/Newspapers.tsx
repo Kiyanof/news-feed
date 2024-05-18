@@ -1,7 +1,7 @@
 "use client"
 // import fakeNews from "@/test/news/fakeNews";
 import { Feed as FeedIcon } from "@mui/icons-material";
-import { Alert, AlertColor, Avatar, CardContent, CardHeader, CircularProgress, Container, Divider, LinearProgress, Pagination, PaginationClasses, PaginationItemClasses, PaginationProps, Paper, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, AlertColor, Avatar, Box, CardContent, CardHeader, CircularProgress, Container, Divider, LinearProgress, Pagination, PaginationClasses, PaginationItemClasses, PaginationProps, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import NewsCard from "../card/NewsCard";
 import { countNews, getNews } from "@/app/API/route/news";
 import { useCallback, useEffect, useState } from "react";
@@ -121,6 +121,17 @@ const Newspapers = () => {
                 <Divider />
                 <CardContent>
                     <Stack direction={'column'} gap={4}>
+                    <Stack direction={{sm: 'row'}}>
+                        <Divider className="tw-border-l-2 tw-border-emerald-800 tw-mr-2" orientation="vertical" flexItem/>
+                        <Typography>
+                            <Typography variant="body1">
+                                {summery}
+                            </Typography>
+                            <Typography variant="caption">
+                                - News Summery
+                            </Typography>
+                        </Typography>
+                    </Stack>
                     <Stack justifyContent={'center'} direction={{sm: 'row'}} gap={2} flexWrap={'wrap'}>
                     {
                         news.length > 0 ?
