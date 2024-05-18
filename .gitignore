@@ -9,5 +9,5 @@
 /**/*.log
 /**/*.js
 /**/dist
-/src/backend/**/modules
+/src/backend/**/*/modules
 /src/modules
