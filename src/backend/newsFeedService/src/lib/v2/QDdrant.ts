@@ -274,6 +274,7 @@ class QDrantController {
             }
           }
         },
+        with_payload: true,
         limit: top,
       });
       logger.debug(`Result: ${result}`);
