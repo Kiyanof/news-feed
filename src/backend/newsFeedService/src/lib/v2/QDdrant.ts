@@ -6,7 +6,7 @@ import logger from "../../config/logger";
 // import axios from "axios";
 // import bluebird from "bluebird";
 import { QdrantClient } from "@qdrant/js-client-rest";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 class QDrantController {
   private _url: string;
@@ -118,26 +118,31 @@ class QDrantController {
   //   return chunks;
   // }
 
-  async addDocument(collection: string, embedding: Float32Array, _id: string, publishedAt: Date) {
+  async addDocument(
+    collection: string,
+    embedding: Float32Array,
+    _id: string,
+    publishedAt: Date
+  ) {
     logger.defaultMeta = { Procedure: "addDocument" };
     logger.info("Adding document...");
-    logger.debug(`embedding length: ${embedding.length}`)
+    logger.debug(`embedding length: ${embedding.length}`);
     try {
       const id = uuidv4();
       const payload = {
         id: _id,
         publishedAt: new Date(publishedAt).getTime(), // should be numeric
-      }
+      };
 
       const body = {
-        "points": [
+        points: [
           {
-            "id": id,
-            "payload": payload,
-            "vector": Object.values(embedding),
+            id: id,
+            payload: payload,
+            vector: Object.values(embedding),
           },
         ],
-      }
+      };
       const result = await this._client.upsert(`${collection}`, body);
       logger.debug(`Result: ${result}`);
       return result;
@@ -227,29 +232,41 @@ class QDrantController {
 
   private dailyRange() {
     const today = new Date();
-    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
-    return [yesterday.getTime(), today.getTime()]
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1
+    );
+    return [yesterday.getTime(), today.getTime()];
   }
 
   private weeklyRange() {
     const today = new Date();
-    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+    const lastWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 7
+    );
     return [lastWeek.getTime(), today.getTime()];
   }
 
   private monthlyRange() {
     const today = new Date();
-    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    const lastMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      today.getDate()
+    );
     return [lastMonth.getTime(), today.getTime()];
   }
 
-  private getRange(frequency: 'daily' | 'weekly' | 'monthly') {
+  private getRange(frequency: "daily" | "weekly" | "monthly") {
     switch (frequency) {
-      case 'daily':
+      case "daily":
         return this.dailyRange();
-      case 'weekly':
+      case "weekly":
         return this.weeklyRange();
-      case 'monthly':
+      case "monthly":
         return this.monthlyRange();
     }
   }
@@ -258,21 +275,23 @@ class QDrantController {
     collection: string,
     query: Float32Array,
     top: number = this._default.relevantTop,
-    frequency: 'daily' | 'weekly' | 'monthly' = 'daily'
+    frequency: "daily" | "weekly" | "monthly" = "daily"
   ) {
     logger.defaultMeta = { Procedure: "findRelevantQuerys" };
     logger.info("Finding relevant querys...");
     try {
-      const result = this._client.search(`${collection}`, {
-        vector: query,
+      const result = await this._client.search(`${collection}`, {
+        vector: Object.values(query),
         filter: {
-          should: {
-            "key": "publishedAt",
-            "range": {
-              "gte": this.getRange(frequency)[0],
-              "lt": this.getRange(frequency)[1]
-            }
-          }
+          should: [
+            {
+              key: "publishedAt",
+              range: {
+                gte: this.getRange(frequency)[0],
+                lt: this.getRange(frequency)[1],
+              },
+            },
+          ],
         },
         with_payload: true,
         limit: top,
@@ -289,16 +308,19 @@ class QDrantController {
     logger.defaultMeta = { Procedure: "deleteOldNews" };
     logger.info("Deleting old news...");
     try {
-      const result = this._client.delete(`${collection}`, JSON.stringify({
-        filter: {
-          should: {
-            "key": "publishedAt",
-            "range": {
-              "lt": +QDRANT_CONFIG.NEWS_EXPIRE
-            }
-          }
-        }
-      }));
+      const result = this._client.delete(
+        `${collection}`,
+        JSON.stringify({
+          filter: {
+            should: {
+              key: "publishedAt",
+              range: {
+                lt: +QDRANT_CONFIG.NEWS_EXPIRE,
+              },
+            },
+          },
+        })
+      );
       logger.debug(`Result: ${result}`);
       return result;
     } catch (error) {
@@ -306,7 +328,6 @@ class QDrantController {
       return null;
     }
   }
-
 
   //   async findSomeRelevantDocuments(
   //     collection: string,

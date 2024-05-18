@@ -3,7 +3,7 @@ import SubscriberModel from "../model/subscriber";
 import logger from "../config/logger";
 import Rabbit from 'rabbitmq'
 import { RABBIT_URL } from "../config/rabbit.conf";
-import { readTheseNews } from "../utils/news";
+import { findSubscriberNews, readTheseNews } from "../utils/news";
 
 const listRelatedNews = async (req: Request, res: Response) => {
     const { email } = req.body
@@ -13,7 +13,7 @@ const listRelatedNews = async (req: Request, res: Response) => {
 
     try {
         const subscriber = await SubscriberModel.findOne({ email })
-                                                .select('lastRelatedNewsIDs lastNewsSummerized')
+                                                .select('lastRelatedNewsIDs lastNewsSummerized prompt frequency embeddingParsedPrompt')
 
 
         if(!subscriber){
@@ -38,8 +38,26 @@ const listRelatedNews = async (req: Request, res: Response) => {
             })
         }
 
-        const newsIDs = subscriber.lastRelatedNewsIDs.slice(skip, skip + pageSize)
+        logger.debug(`Fetching news for ${email} page ${page}`)
+        let newsIDs = subscriber.lastRelatedNewsIDs.slice(skip, skip + pageSize)
+        if(newsIDs.length === 0){
+            logger.warn(`No news found for ${email}`)
+            logger.debug("Finding relevants news for subscriber...")
+            const result = await rabbit.callProcedure(findSubscriberNews, { prompt: subscriber.prompt, parsedPrompt: subscriber.embeddingParsedPrompt , frequency: subscriber.frequency })
 
+            if(result) {
+                logger.info("Relevants news found")
+                logger.debug("Saving relevants news to subscriber")
+                subscriber.lastRelatedNewsIDs = result.relevanceNews
+                subscriber.lastNewsSummerized = result.summery
+                await subscriber.save()
+                logger.info("Relevants news saved to subscriber")
+
+                newsIDs = subscriber.lastRelatedNewsIDs.slice(skip, skip + pageSize)
+            }
+        }
+
+        logger.debug("Reading news...")
         const wholeNews = await rabbit.callProcedure(readTheseNews, { newsID: newsIDs })
         if(!wholeNews){
             logger.error("Failed to read news")
@@ -50,6 +68,7 @@ const listRelatedNews = async (req: Request, res: Response) => {
             })
         }
 
+        logger.info("News read successfully")
         return res.status(200).json({
             message: "Success",
             error: [],

@@ -2,8 +2,8 @@ import { createConsumer } from "rabbitmq"
 import { readFeeds } from "../utils/subscription";
 
 const readFeedConsumer = createConsumer({
-    procedureName: "news/readFeed",
-    defaultQueue: "readFeed",
+    procedureName: "news/findRelevants",
+    defaultQueue: "findRelevants",
     callback: readFeeds,
 })
 
