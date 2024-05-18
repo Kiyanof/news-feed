@@ -43,13 +43,35 @@ class Whitelist {
     }
   }
 
+  private dateToSeconds(date: Date) {
+    return Math.floor(date.getTime() / 1000);
+  }
+
+  private calculateTTL(date: Date) {
+    const now = Math.floor(Date.now() / 1000);
+    return this.dateToSeconds(date) - now;
+  }
+
+  private async setTTL(jwtid: string, ttl: number) {
+    try {
+      const response = await this._client.expire(jwtid, ttl);
+      logger.debug(`Token ${jwtid} TTL set: ${!!response && response > 0}`);
+      return true;
+    } catch (error) {
+      logger.error(`Error setting token TTL: ${error}`);
+      return false;
+    }
+  }
+
   private async add(document: IWhiteList) {
     logger.debug("Adding token to whitelist");
     try {
+      const key = `${document.type}:${document.jwtid}`
       const response = await this._client.set(
-        `${document.type}:${document.jwtid}`,
+        key,
         JSON.stringify(document)
       );
+      await this.setTTL(key, this.calculateTTL(document.expireAt));
       logger.debug(
         `Token ${document.jwtid} added to whitelist: ${response === "OK"}`
       );
@@ -62,7 +84,7 @@ class Whitelist {
 
   private async remove(jwtid: string) {
     try {
-      const response = await this._client.del(`*:${jwtid}`);
+      const response = await this._client.del(`${jwtid}`);
       logger.debug(`Token ${jwtid} removed from whitelist: ${!!response && response > 0}`);
       return true;
     } catch (error) {
@@ -73,7 +95,7 @@ class Whitelist {
 
   private async has(jwtid: string): Promise<boolean> {
     try {
-      const response = await this._client.exists(`ACCESS:${jwtid}`);
+      const response = await this._client.exists(`${jwtid}`);
       logger.debug(`Token ${jwtid} is in whitelist: ${!!response && response > 0}`);
       return !!response && response > 0;
     } catch (error) {
