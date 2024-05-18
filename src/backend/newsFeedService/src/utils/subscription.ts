@@ -70,13 +70,13 @@ const readFeeds = async (
       QDRANT_URL
     ).findRelevantDocuments("news", query, 10, frequency);
 
-    if (!relevants || relevants.status !== "ok") {
+    if (!relevants) {
       logger.warn("No relevants found");
       throw new Error("Error finding relevants");
     }
     logger.info("Relevants found");
     logger.debug("Finding news IDs with relevants");
-    const newsIDs = relevants.result.map((item: any) => item.payload.id);
+    const newsIDs = relevants.map((item: any) => item.payload.id);
     if (!newsIDs || newsIDs.length <= 0) {
       logger.warn("No news IDs found");
       throw new Error("Error finding news IDs");
@@ -96,7 +96,7 @@ const readFeeds = async (
         logger.error("Error connecting to RabbitMQ");
         throw new Error("Error connecting to RabbitMQ");
     }
-    const summery = await rabbit.callProcedure(summerizeNews, { content: news, keywords: prompt })
+    const summery = await rabbit.callProcedure(summerizeNews, { content: news.map((item) => item.content), keywords: prompt })
     if (!summery) {
       logger.warn("No summery found");
       throw new Error("Error finding summery");
@@ -104,8 +104,7 @@ const readFeeds = async (
     logger.info("Summery found");
     return { summery, relevanceNews: newsIDs };
   } catch (error) {
-    logger.error("Error reading news feeds");
-    logger.error(error);
+    logger.error(`Error reading news feeds, error: ${error}`);
     return { summery: null, relevanceNews: [] };
   }
 };

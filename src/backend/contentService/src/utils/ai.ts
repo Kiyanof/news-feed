@@ -60,11 +60,11 @@ export default class Ai {
     }
   }
 
-  public async summarizeArticles({contents, keywords}:{contents: Array<string>, keywords: string}){
+  public async summarizeArticles({content, keywords}:{content: Array<string>, keywords: string}){
     logger.info("Summarizing Articles...")
     try{
       logger.debug(`Summarizing articles with keywords: ${keywords}`)
-      const body = summarizeArticleBody(contents, keywords)
+      const body = summarizeArticleBody(content, keywords)
       if(!body) throw new Error("Error summarizing articles")
       logger.info(`body prompt generated successfully`)
       logger.debug("Sending Prompt...")
@@ -75,7 +75,7 @@ export default class Ai {
         result: reply.message.content
       }
     } catch (error) {
-      logger.error(error)
+      logger.error(`Error summarizing articles: ${error.message}`)
       return {
         result: null
       }

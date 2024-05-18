@@ -296,7 +296,7 @@ class QDrantController {
         with_payload: true,
         limit: top,
       });
-      logger.debug(`Result: ${result}`);
+      logger.debug(`Result: ${result.length}`);
       return result;
     } catch (error) {
       logger.error(`Error finding relevant documents: ${error}`);

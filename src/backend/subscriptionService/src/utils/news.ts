@@ -7,9 +7,9 @@ interface IResult {
     relevanceNews: Array<string>;
 }
 
-const findSubscriberNews = async (channel: Channel, {parsedPrompt, frequency}:{parsedPrompt: string, frequency: Frequency}): Promise<IResult | null> => {
+const findSubscriberNews = async (channel: Channel, {parsedPrompt, frequency, prompt}:{parsedPrompt: string, frequency: Frequency, prompt: string}): Promise<IResult | null> => {
     try {
-        const result = await findRelevantsProducer(channel, { parsedPrompt, frequency }, async (_content) => {
+        const result = await findRelevantsProducer(channel, { parsedPrompt, frequency, prompt }, async (_content) => {
             return _content
         })
         return result as IResult

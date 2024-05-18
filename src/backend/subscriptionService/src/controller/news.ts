@@ -45,14 +45,16 @@ const listRelatedNews = async (req: Request, res: Response) => {
             logger.debug("Finding relevants news for subscriber...")
             const result = await rabbit.callProcedure(findSubscriberNews, { prompt: subscriber.prompt, parsedPrompt: subscriber.embeddingParsedPrompt , frequency: subscriber.frequency })
 
-            if(result) {
+            if(result && result.state) {
                 logger.info("Relevants news found")
                 logger.debug("Saving relevants news to subscriber")
-                subscriber.lastRelatedNewsIDs = result.relevanceNews
-                subscriber.lastNewsSummerized = result.summery
+                logger.debug(`result: ${JSON.stringify(result)}`)
+                subscriber.lastRelatedNewsIDs = result.body.relevanceNews
+                subscriber.lastNewsSummerized = result.body.summery
                 await subscriber.save()
                 logger.info("Relevants news saved to subscriber")
 
+                logger.debug('lastRelatedNewsIDs: ', subscriber.lastRelatedNewsIDs)
                 newsIDs = subscriber.lastRelatedNewsIDs.slice(skip, skip + pageSize)
             }
         }
@@ -78,7 +80,7 @@ const listRelatedNews = async (req: Request, res: Response) => {
             }
         })
     } catch (error) {
-        logger.error(error)
+        logger.error(`Failed to list related news for ${email}, error: ${error.message}`)
         return res.status(500).json({
             message: "Internal Server Error",
             error: [error.message],

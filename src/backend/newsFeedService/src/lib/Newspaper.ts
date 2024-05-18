@@ -283,7 +283,11 @@ class NewsController {
 
     async syncNews() {
         logger.debug('syncNews...')
-        await this.resetNewsCollection()
+        if(
+            +(process.env.RESET_NEWS || 0) === 1
+        ) {
+            await this.resetNewsCollection()
+        }
 
         if(this._newsapiActive !== 0) {
             await this._newsapi.syncNews()
