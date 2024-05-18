@@ -76,7 +76,7 @@ const readFeeds = async (
     }
     logger.info("Relevants found");
     logger.debug("Finding news IDs with relevants");
-    const newsIDs = relevants.result.map((item: any) => item.id);
+    const newsIDs = relevants.result.map((item: any) => item.payload.id);
     if (!newsIDs || newsIDs.length <= 0) {
       logger.warn("No news IDs found");
       throw new Error("Error finding news IDs");
