@@ -197,6 +197,18 @@ class Tokenizer {
     }
   }
 
+  /**
+   * Signs a refresh token.
+   * @param {Payload} payload - The payload to sign.
+   * @param {Claims} claims - The claims to sign.
+   * @param {string} secret - The secret key to sign with.
+   * @param {Algorithm} algorithm - The algorithm to sign with.
+   * @returns {string | null} The signed token or null if an error occurred.
+   * @async
+   * @private
+   * @method
+   * @memberof Tokenizer
+   */
   private async signRefresh({
     payload,
     claims,

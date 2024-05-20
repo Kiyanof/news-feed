@@ -47,13 +47,13 @@ abstract class Newspaper {
     logger.debug(`lang: ${this._lang}`);
   }
 
-  public async update(keyword?: string, lang?: string) {
+  public async update(keyword?: string, _lang?: string) {
     logger.debug(`Updating ${this._name}...`);
     try {
       if (keyword) {
         this.addQuery(`q=${keyword}`);
       }
-      const url = `${this._URL}${this._query ?? ""}${lang ?? ''}`
+      const url = `${this._URL}${this._query ?? ""}`
       logger.debug(`url: ${url}`);
       const response = await axios.get(url);
       logger.debug(`response: ${response}`);
@@ -107,11 +107,14 @@ abstract class Newspaper {
         url: RABBIT_URL
       })
   
-      if(!await rabbit.isReady()) {logger.warn(`Broker is not ready!`)}
+      if(!await rabbit.isReady()) {
+        logger.warn(`Broker is not ready!`)
+        return []
+      }
       else {
         const result = await rabbit.callProcedure(readAllKeywords, {})
         if(!result || !result.result) return []
-        return result
+        return []
       }
     } catch (error) {
       logger.error(`Rabbit mq rise an error, error: ${error}`)

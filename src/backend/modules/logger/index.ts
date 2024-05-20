@@ -36,4 +36,5 @@ const createLogger = (
   return logger;
 };
 
+export type Logger = winston.Logger;
 export default createLogger;

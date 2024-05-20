@@ -2,6 +2,7 @@ import { addSubscriberProducer } from "subscription-service"
 import Rabbit, { Channel } from "rabbitmq"
 import logger from "../config/logger"
 import { RABBIT_URL } from "../config/rabbit.config"
+import { Frequency } from "../model/user"
 
 interface Response {
     state: boolean,
@@ -11,12 +12,16 @@ interface Response {
     }
 }
 
-enum Frequency {
-    DAILY = "daily",
-    WEEKLY = "weekly",
-    MONTHLY = "monthly"
-}
-
+/**
+ * Add a subscriber.
+ * @async
+ * @param {Channel} channel - The RabbitMQ channel.
+ * @param {Object} subscriber - The subscriber to add.
+ * @param {string} subscriber.email - The email of the subscriber.
+ * @param {Frequency} subscriber.frequency - The frequency of the subscription.
+ * @param {string} subscriber.prompt - The prompt for the subscription.
+ * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating whether the subscriber was added successfully.
+ */
 const addSubsciber = async (channel: Channel, subscriber:{email: string, frequency: Frequency, prompt: string}): Promise<boolean> => {
     const result = await addSubscriberProducer(channel, subscriber, (response) => {
         return new Promise((resolve, _reject) => {
@@ -30,6 +35,14 @@ const addSubsciber = async (channel: Channel, subscriber:{email: string, frequen
     return result
 }
 
+/**
+ * Add a subscriber to the subscription service.
+ * @async
+ * @param {string} email - The email of the subscriber.
+ * @param {Frequency} frequency - The frequency of the subscription.
+ * @param {string} prompt - The prompt for the subscription.
+ * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating whether the subscriber was added to the subscription service successfully.
+ */
 const addSubsciberToSubscriptionService = async (email: string, frequency: Frequency, prompt: string): Promise<boolean> => {
     try {
         logger.debug(`Change subscriber to subscription service...`)

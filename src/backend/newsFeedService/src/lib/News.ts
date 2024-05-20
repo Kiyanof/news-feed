@@ -136,11 +136,11 @@ class News {
      * 
      */
     private static generateEmbeddingWithFastEmbedding(content: string): Promise<Array<Number>> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _reject) => {
             exec(`source ${__dirname}/python/venv/bin/activate && python3 ${__dirname}/python/fast_embed.py "${content}"`, (error, _stdout, stderr) => {
                 if (error) {
                     logger.error(`Error generating embedding, Error: ${error}`);
-                    reject(error);
+                    resolve([]);
                     return;
                 }
                 if (stderr) {

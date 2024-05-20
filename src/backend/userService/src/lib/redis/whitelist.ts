@@ -2,8 +2,16 @@ import Tokenizer, { IWhiteList } from "../auth/tokenizer";
 import logger from "../../config/logger";
 import { Redis } from "ioredis";
 
+/**
+ * Whitelist class for managing tokens.
+ */
 class Whitelist {
 
+  /**
+   * Whitelist constructor.
+   * @param {Tokenizer} _tokenizer - The tokenizer instance.
+   * @param {Redis} _client - The Redis client instance.
+   */
   constructor(
     private readonly _tokenizer: Tokenizer,
     private readonly _client: Redis
@@ -11,6 +19,9 @@ class Whitelist {
     logger.defaultMeta.service = "whitelist";
   }
 
+  /**
+   * Initializes the Whitelist service.
+   */
   public async init() {
     try {
 
@@ -43,16 +54,32 @@ class Whitelist {
     }
   }
 
-  private dateToSeconds(date: Date) {
+  /**
+   * Converts a Date object to seconds.
+   * @param {Date} date - The date to convert.
+   * @returns {number} The date in seconds.
+   */
+  private dateToSeconds(date: Date): number {
     return Math.floor(date.getTime() / 1000);
   }
 
-  private calculateTTL(date: Date) {
+  /**
+   * Calculates the TTL (Time To Live) for a token.
+   * @param {Date} date - The expiration date of the token.
+   * @returns {number} The TTL in seconds.
+   */
+  private calculateTTL(date: Date): number {
     const now = Math.floor(Date.now() / 1000);
     return this.dateToSeconds(date) - now;
   }
 
-  private async setTTL(jwtid: string, ttl: number) {
+  /**
+   * Sets the TTL for a token.
+   * @param {string} jwtid - The JWT ID of the token.
+   * @param {number} ttl - The TTL to set.
+   * @returns {Promise<boolean>} True if successful, false otherwise.
+   */
+  private async setTTL(jwtid: string, ttl: number): Promise<boolean> {
     try {
       const response = await this._client.expire(jwtid, ttl);
       logger.debug(`Token ${jwtid} TTL set: ${!!response && response > 0}`);
@@ -63,7 +90,12 @@ class Whitelist {
     }
   }
 
-  private async add(document: IWhiteList) {
+  /**
+   * Adds a token to the whitelist.
+   * @param {IWhiteList} document - The token document to add.
+   * @returns {Promise<boolean>} True if successful, false otherwise.
+   */
+  private async add(document: IWhiteList): Promise<boolean> {
     logger.debug("Adding token to whitelist");
     try {
       const key = `${document.type}:${document.jwtid}`
@@ -82,7 +114,12 @@ class Whitelist {
     }
   }
 
-  private async remove(jwtid: string) {
+  /**
+   * Removes a token from the whitelist.
+   * @param {string} jwtid - The JWT ID of the token to remove.
+   * @returns {Promise<boolean>} True if successful, false otherwise.
+   */
+  private async remove(jwtid: string): Promise<boolean> {
     try {
       const response = await this._client.del(`${jwtid}`);
       logger.debug(`Token ${jwtid} removed from whitelist: ${!!response && response > 0}`);
@@ -93,6 +130,11 @@ class Whitelist {
     }
   }
 
+  /**
+   * Checks if a token is in the whitelist.
+   * @param {string} jwtid - The JWT ID of the token to check.
+   * @returns {Promise<boolean>} True if the token is in the whitelist, false otherwise.
+   */
   private async has(jwtid: string): Promise<boolean> {
     try {
       const response = await this._client.exists(`${jwtid}`);
@@ -104,6 +146,9 @@ class Whitelist {
     }
   }
 
+  /**
+   * Destroys the Whitelist service.
+   */
   async destroy() {
     logger.debug("Destroying whitelist service...");
     this._tokenizer.events.removeAllListeners('addToken');

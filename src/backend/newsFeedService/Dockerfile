@@ -8,11 +8,18 @@
     FROM base AS dependencies
     RUN npm install 
     # later use npm CI
+
+    # ---- Python ----
+    FROM dependencies AS python
+    RUN apk add --no-cache python3
     
     # ---- Build ----
-    FROM dependencies AS build
+    FROM python AS build
     COPY . .
     RUN npm run build
+
+    # ---- Copy Python Directory ----
+    COPY ./src/lib/python ./dist/lib/python
     
     # ---- Release ----
     FROM node:lts-alpine AS release

@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import logger from "../config/logger";
 import { MONGO_URI } from "../config/mongo.config";
 
+/**
+ * Initialize MongoDB connection events.
+ */
 const initMongoEvents = () => {
   mongoose.connection.on("connected", () =>
     logger.info("DB Connection established")
@@ -17,6 +20,11 @@ const initMongoEvents = () => {
   );
 };
 
+/**
+ * Initialize MongoDB connection.
+ * @async
+ * @return {Promise<mongoose.Connection | null>} The mongoose connection object if successful, null otherwise.
+ */
 const mongoInit = async () => {
   logger.info("Initializing MongoDB...");
   try {
@@ -34,6 +42,9 @@ const mongoInit = async () => {
   }
 };
 
+/**
+ * Handle system signals for graceful shutdown.
+ */
 const handleSignals = () => {
   ["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) =>
     process.on(signal, () => {
@@ -44,6 +55,10 @@ const handleSignals = () => {
   );
 };
 
+/**
+ * Initialize the application.
+ * @async
+ */
 const appInit = async () => {
   logger.defaultMeta = { label: "init " };
   logger.info("Initializing...");
