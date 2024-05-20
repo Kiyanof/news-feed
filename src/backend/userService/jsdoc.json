@@ -1,0 +1,42 @@
+{
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "source": {
+        "include": ["./dist"],
+        "exclude": ["node_modules", "test", "logs", "rabbit-service-log", "modules"],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "sourceType": "module",
+    "plugins": ["plugins/markdown"],
+    "recurseDepth": 10,
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false
+    },
+    "opts": {
+        "templates": "node_modules/docdash",
+        "destination": "./docs/",
+        "recurse": true
+    },
+    "docdash": {
+        "static": true,
+        "sort": true,
+        "meta": {
+            "title": "user Service",
+            "description": "User Service Documentation",
+            "keyword": "User Service, Documentation"
+        },
+        "search": true,
+        "collapse": true,
+        "wrap": true,
+        "typedefs": true,
+        "removeQuotes": "none",
+        "scripts": [],
+        "disqus": "",
+        "googleAnalytics": "",
+        "highlightTutorialCode": true
+    }
+}
