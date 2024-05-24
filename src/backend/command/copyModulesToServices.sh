@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# List of directories
+dirs=(
+  "./../modules/logger/"
+  "./../rabbitmq/"
+  "./../tokenizer/"
+  "./../producers/content/"
+  "./../producers/news/"
+  "./../producers/notification/"
+  "./../producers/subscription/"
+)
+
+for dir in "${dirs[@]}"; do
+  if [ -d "$dir" ]; then
+    echo "Processing $dir"
+    cd "$dir" || exit
+    npm install
+    npm run build
+  else
+    echo "$dir does not exist"
+  fi
+done
+
 services=("contentService" "userService" "newsFeedService" "notificationService" "subscriptionService")
 
 # Iterate over each service in the services array

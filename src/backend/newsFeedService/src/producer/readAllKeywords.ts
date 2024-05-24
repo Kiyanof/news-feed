@@ -12,7 +12,7 @@ interface Response {
 const readAllKeywords = async (channel: Channel, content:{}): Promise<{result: Array<string> | null}> => {
     const result = await getKeywordsProducer(channel, content, (response) => {
         return new Promise((resolve, _reject) => {
-            if(response){
+            if(response){ 
                 resolve((response as Response).body.result)
             } else {
                 resolve(null)

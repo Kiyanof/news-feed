@@ -12,7 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "amqplib": "^0.10.4"
+    "amqplib": "^0.10.4",
+    "logger": "file:../logger"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5"

@@ -28,7 +28,12 @@ abstract class Newspaper {
   protected _query: string;
   protected _lang: string;
 
-  constructor(API_KEY: string, ENDPOINT: string, URL: string, LANGUAGE: string = "en") {
+  constructor(
+    API_KEY: string,
+    ENDPOINT: string,
+    URL: string,
+    LANGUAGE: string = "&language=en"
+  ) {
     logger.debug("Newspaper class init...");
 
     this._name = this.constructor.name;
@@ -39,7 +44,7 @@ abstract class Newspaper {
     logger.debug(`API_KEY: ${this._API_KEY}`);
     this._ENDPOINT = ENDPOINT;
     logger.debug(`ENDPOINT: ${this._ENDPOINT}`);
-    this._URL = `${URL}/${this._ENDPOINT}?apikey=${this._API_KEY}`; // NOTE: newsapi use camelCase for apiKey
+    this._URL = `${URL}/${this._ENDPOINT}?apikey=${this._API_KEY}&`; // NOTE: newsapi use camelCase for apiKey
     logger.debug(`URL: ${this._URL}`);
     this._query = "";
     logger.debug(`query: ${this._query}`);
@@ -51,14 +56,14 @@ abstract class Newspaper {
     logger.debug(`Updating ${this._name}...`);
     try {
       if (keyword) {
-        this.addQuery(`q=${keyword}`);
+        this.addQuery(`${keyword}`);
       }
-      const url = `${this._URL}${this._query ?? ""}`
+      const url = `${this._URL}${this._query ?? ""}${this._lang}`;
       logger.debug(`url: ${url}`);
       const response = await axios.get(url);
       logger.debug(`response: ${response}`);
       if (keyword) {
-        this.removeQuery(`q=${keyword}`);
+        this.removeQuery(`${keyword}`);
       }
       return response.data;
     } catch (error) {
@@ -79,20 +84,32 @@ abstract class Newspaper {
     if (this._query === "") {
       this._query = `q=${query}`;
     } else {
-      this._query = `${this._query}&${query}`;
+      this._query = `${this._query} ${query}`;
     }
     logger.debug(`query: ${this._query}`);
   }
 
   protected removeQuery(query: string) {
-    this._query = this._query.replace(query, "");
+    this._query = this._query.replace(`q=${query}`, "");
     logger.debug(`query: ${this._query}`);
   }
 
-  protected async saveNews(article: IGnewArticle | INewsdataArticle | INewsapiArticle ) {
+  protected async saveNews(
+    article: IGnewArticle | INewsdataArticle | INewsapiArticle,
+    keywords: string[] = []
+  ) {
     try {
-      const news = new News({ ...article });
+      const news = new News({
+        title: article.title,
+        description: article.description,
+        content: article.content,
+        url: article.url,
+        publishedAt: article.publishedAt,
+        source: article.source.name,
+        keywords: [...keywords],
+      });
       this._news.push(news);
+      await news.scrapeContent()
       await news.generateEmbedding();
       await news.save();
       logger.info(`${this._name}: ${this._news.length} news saved`);
@@ -103,22 +120,21 @@ abstract class Newspaper {
 
   protected async readKeywords() {
     try {
-      const rabbit =  Rabbit.new({
-        url: RABBIT_URL
-      })
-  
-      if(!await rabbit.isReady()) {
-        logger.warn(`Broker is not ready!`)
-        return []
-      }
-      else {
-        const result = await rabbit.callProcedure(readAllKeywords, {})
-        if(!result || !result.result) return []
-        return []
+      const rabbit = Rabbit.new({
+        url: RABBIT_URL,
+      });
+
+      if (!(await rabbit.isReady())) {
+        logger.warn(`Broker is not ready!`);
+        return [];
+      } else {
+        const result = await rabbit.callProcedure(readAllKeywords, {});
+        if (result.length <= 0) return [];
+        return result;
       }
     } catch (error) {
-      logger.error(`Rabbit mq rise an error, error: ${error}`)
-      return []
+      logger.error(`Rabbit mq rise an error, error: ${error}`);
+      return [];
     }
   }
 }
@@ -144,7 +160,8 @@ class Newsdata extends Newspaper {
     super(
       NEWS_CONFIG.NEWSDATA.API_KEY,
       NEWS_CONFIG.NEWSDATA.ENDPOINT,
-      NEWS_CONFIG.NEWSDATA.PATH
+      NEWS_CONFIG.NEWSDATA.PATH,
+      "&language=en"
     );
   }
 
@@ -166,7 +183,10 @@ class Newsdata extends Newspaper {
     for (let i = start; i < end; i++) {
       this.toPage(i !== 0 ? next : undefined);
 
-      const result = (await this.update(keyword, `&language=${this._lang}`)) as INewsdata;
+      const result = (await this.update(
+        keyword,
+        `${this._lang}`
+      )) as INewsdata;
 
       if (!result && i === 0) {
         return {
@@ -189,30 +209,29 @@ class Newsdata extends Newspaper {
   async syncNews() {
     logger.debug("syncNews...");
     try {
-
-      const keywords = await this.readKeywords()
-      if (keywords.length <= 0 ){
-        const { totalResults, results } = await this.gatherFromPages(
+      const keywords = await this.readKeywords();
+      if (keywords.length <= 0) {
+        const { totalResults, results } = (await this.gatherFromPages(
           0,
           +NEWS_CONFIG.NEWSDATA.MAX / 10
-        ) as INewsdata
+        )) as INewsdata;
         if (!totalResults || !results) return;
-  
+
         for (const article of results) {
-          this.saveNews({...article, url: article.link})
+          await this.saveNews({ ...article, url: article.link }, ['general']);
         }
         logger.info(`Newsdata: ${this._news.length} news saved`);
       } else {
         for (const keyword of keywords) {
-          const { totalResults, results } = await this.gatherFromPages(
+          const { totalResults, results } = (await this.gatherFromPages(
             0,
-            +NEWS_CONFIG.NEWSDATA.MAX / 10, 
+            +NEWS_CONFIG.NEWSDATA.MAX / 10,
             keyword
-          ) as INewsdata
+          )) as INewsdata;
           if (!totalResults || !results) return;
-    
+
           for (const article of results) {
-            this.saveNews({...article, url: article.link})
+            await this.saveNews({ ...article, url: article.link }, [keyword]);
           }
           logger.info(`Newsdata: ${this._news.length} news saved`);
         }
@@ -228,43 +247,47 @@ class Newsapi extends Newspaper {
     super(
       NEWS_CONFIG.NEWSAPI.API_KEY,
       NEWS_CONFIG.NEWSAPI.ENDPOINT,
-      NEWS_CONFIG.NEWSAPI.PATH
+      NEWS_CONFIG.NEWSAPI.PATH,
+      "&language=en"
     );
-    this._query = "&language=en";
   }
 
   async syncNews() {
     logger.debug("syncNews...");
     try {
-      const keywords = await this.readKeywords()
+      const keywords = await this.readKeywords();
 
-      if(keywords.length <= 0){
-        const { totalArticles, articles } = (await this.update()) as INewsapi;
-        if (!totalArticles || !articles) return
+      if (keywords.length <= 0) {
+        const { totalResults, articles } = (await this.update()) as INewsapi;
+        if (!totalResults || !articles) return;
 
-        for (const article of articles) {
-          this.saveNews(article)
+        for (const index in articles) {
+          if(index > NEWS_CONFIG.NEWSAPI.MAX) break;
+          this.saveNews(articles[index], ['general']);
         }
         logger.info(`Gnews: ${this._news.length} news saved`);
       }
 
       for (const keyword of keywords) {
-        const { totalArticles, articles } = (await this.update(keyword, `&language=${this._lang}`)) as INewsapi;
+        const { totalResults, articles } = (await this.update(
+          keyword,
+          this._lang
+        )) as INewsapi;
 
-        if (!totalArticles || !articles) {
-          logger.warn(`Not any news found for keyword: ${keyword}`)
+        if (!totalResults || !articles) {
+          logger.warn(`Not any news found for keyword: ${keyword}`);
         } else {
-          for (const article of articles) {
-            this.saveNews(article)
+          for (const index in articles) {
+            if(index > NEWS_CONFIG.NEWSAPI.MAX) break;
+            this.saveNews(articles[index], [keyword]);
           }
           logger.info(`Gnews: ${this._news.length} news saved`);
-        } 
+        }
       }
     } catch (error) {
       logger.error(`Error syncing news: ${error}`);
     }
   }
-
 }
 
 class Gnews extends Newspaper {
@@ -272,37 +295,43 @@ class Gnews extends Newspaper {
     super(
       NEWS_CONFIG.GNEWS.API_KEY,
       NEWS_CONFIG.GNEWS.ENDPOINT,
-      NEWS_CONFIG.GNEWS.PATH
+      NEWS_CONFIG.GNEWS.PATH,
+      "&lang=en"
     );
   }
 
   async syncNews() {
     logger.debug("syncNews...");
     try {
+      const keywords = await this.readKeywords();
+      logger.debug(`Keywords Length: ${keywords.length}`);
 
-      const keywords = await this.readKeywords()
-
-      if(keywords.length <= 0){
+      if (keywords.length <= 0) {
         const { totalArticles, articles } = (await this.update()) as IGnews;
-        if (!totalArticles || !articles) return
+        if (!totalArticles || !articles) return;
 
-        for (const article of articles) {
-          this.saveNews(article)
+        for (const index in articles) {
+          if(index > NEWS_CONFIG.GNEWS.MAX) break;
+          await this.saveNews(articles[index], ['general']);
         }
         logger.info(`Gnews: ${this._news.length} news saved`);
       }
 
       for (const keyword of keywords) {
-        const { totalArticles, articles } = (await this.update(keyword, `&lang=${this._lang}`)) as IGnews;
+        const { totalArticles, articles } = (await this.update(
+          keyword,
+          `${this._lang}`
+        )) as IGnews;
 
         if (!totalArticles || !articles) {
-          logger.warn(`Not any news found for keyword: ${keyword}`)
+          logger.warn(`Not any news found for keyword: ${keyword}`);
         } else {
-          for (const article of articles) {
-            this.saveNews(article)
+          for (const index in articles) {
+            if(index > NEWS_CONFIG.GNEWS.MAX) break;
+            await this.saveNews(articles[index], [keyword]);
           }
           logger.info(`Gnews: ${this._news.length} news saved`);
-        } 
+        }
       }
     } catch (error) {
       logger.error(`Error syncing news: ${error}`);
@@ -322,14 +351,17 @@ class NewsController {
   }
 
   private get _newsdataActive() {
+    logger.debug(`_newsdataActive: ${NEWS_CONFIG.NEWSDATA.ACTIVE}`);
     return NEWS_CONFIG.NEWSDATA.ACTIVE;
   }
 
   private get _newsapiActive() {
+    logger.debug(`_newsapiActive: ${NEWS_CONFIG.NEWSAPI.ACTIVE}`);
     return NEWS_CONFIG.NEWSAPI.ACTIVE;
   }
 
   private get _gnewsActive() {
+    logger.debug(`_gnewsActive: ${NEWS_CONFIG.GNEWS.ACTIVE}`);
     return NEWS_CONFIG.GNEWS.ACTIVE;
   }
 
@@ -412,11 +444,11 @@ class NewsController {
 
   async syncNews() {
     logger.debug("syncNews...");
-    if (+(process.env.RESET_NEWS || 0) === 1) {
-      await this.hardResetNewsCollection();
-    } else {
-      await this.resetNewsCollection();
-    }
+      if (+(process.env.RESET_NEWS || 0) === 1) {
+        await this.hardResetNewsCollection();
+      } else {
+        await this.resetNewsCollection();
+      }
 
     if (this._newsapiActive !== 0) {
       await this._newsapi.syncNews();

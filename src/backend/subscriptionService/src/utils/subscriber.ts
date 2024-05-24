@@ -4,6 +4,7 @@ import SubscriberModel from "../model/subscriber";
 import { addKeyword, parsePrompt } from "./subscription";
 import { RABBIT_URL } from "../config/rabbit.conf";
 import { embedding } from "./news";
+import SUBSCRIPTION_CONFIG from "../config/subscription.config";
 
 enum Frequency {
   DAILY = "daily",
@@ -126,13 +127,14 @@ const addSubsciber = async ({
     if(!await rabbit.isReady()) {throw new Error('RabbitMQ connection failed')}
     logger.info(`Connected to RabbitMQ`)
     logger.debug(`Calling parsePrompt procedure...`)
-    const parsedPrompt = await rabbit.callProcedure(parsePrompt, { content: prompt })
+    const parsedPrompt = SUBSCRIPTION_CONFIG.PARSE_PROMPT === 1 ? await rabbit.callProcedure(parsePrompt, { content: prompt }) : prompt
+    logger.debug(`Parsed prompt: ${parsedPrompt}`)
     if(!parsedPrompt) {throw new Error('Prompt parsing failed')}
     logger.info(`Prompt parsed successfully`)
     const isKeywordAdded = addKeyword(parsedPrompt)
     if(!isKeywordAdded) {throw new Error('Keyword adding failed')}
     logger.debug(`Calling embedding procedure...`)
-    const embeddingParsedPrompt = await rabbit.callProcedure(embedding, { parsedPrompt })
+    const embeddingParsedPrompt = await rabbit.callProcedure(embedding, { parsedPrompt: parsedPrompt })
     if(!embeddingParsedPrompt) {throw new Error('Prompt embedding failed')}
     logger.info(`Prompt embedded successfully`)
 

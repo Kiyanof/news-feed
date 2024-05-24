@@ -5,7 +5,7 @@ import BrokerError from "./BrokerError";
 import logger from "../config/logger";
 import DatabaseError from "./DatabaseError";
 import UnauthorizedError from "./UnauthorizedError";
-import API_CONFIG from "src/config/API.config";
+import API_CONFIG from "../config/API.config";
 
 /**
  * Error handling middleware for API routes.

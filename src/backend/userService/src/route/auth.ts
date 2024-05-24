@@ -15,7 +15,7 @@ import {
   signinValidation,
   signupValidation,
 } from "../validation/user";
-import APP_CONFIG from "src/config/app.config";
+import APP_CONFIG from "../config/app.config";
 
 const router = Router();
 
@@ -28,7 +28,7 @@ const limiter = rateLimit({
 router.use(logRequests);
 router.use(limiter);
 
-router.post("/subscribe", signupValidation, isUserExist, signup);
+router.post("/subscribe", signupValidation, signup);
 router.post("/login", signinValidation, isUserExist, login);
 router.post("/logout", authenticate, logout);
 

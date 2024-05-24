@@ -11,7 +11,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "amqplib": "^0.10.4"
+    "amqplib": "^0.10.4",
+    "logger": "file:../../logger",
+    "rabbitmq": "file:../../rabbitmq"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5"

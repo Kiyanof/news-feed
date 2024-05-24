@@ -6,6 +6,21 @@ import NewsModel from "../model/news";
 import { JSDOM } from 'jsdom';
 import {Readability} from '@mozilla/readability';
 import axios from "axios";
+// import { join } from 'path';
+
+interface NewsProps {
+    title: string;
+    description: string;
+    content: string;
+    category?: string;
+    author?: string;
+    keywords?: Array<string>;
+    country?: string;
+    language?: string;
+    publishedAt?: Date;
+    source?: string;
+    url?: string;
+}
 
 /**
  * Represents a news article with various attributes such as title, description, content, category, author, keywords, country, language, publication date, source, and URL.
@@ -89,7 +104,7 @@ class News {
     /**
      * Constructs a new instance of the News class.
      */
-    constructor({...props}){        
+    constructor({...props}: NewsProps){        
         logger.defaultMeta = { label: 'News ' };
         logger.info('Creating a new instance of the News class');
 
@@ -135,9 +150,9 @@ class News {
     /**
      * 
      */
-    private static generateEmbeddingWithFastEmbedding(content: string): Promise<Array<Number>> {
+    private static generateEmbeddingWithFastEmbedding(content: string, kind: 'passage' | 'query' = 'passage'): Promise<Array<Number>> {
         return new Promise((resolve, _reject) => {
-            exec(`source ${__dirname}/python/venv/bin/activate && python3 ${__dirname}/python/fast_embed.py "${content}"`, (error, _stdout, stderr) => {
+            exec(`. ${__dirname}/python/venv/bin/activate && python3.11 ${__dirname}/python/fast_embed.py "${content}" "${kind}"`, (error, _stdout, stderr) => {
                 if (error) {
                     logger.error(`Error generating embedding, Error: ${error}`);
                     resolve([]);
@@ -164,17 +179,19 @@ class News {
         logger.info('Generating embedding for news article content');
         const content = this._content;
         const embedding = await News.generateEmbeddingWithFastEmbedding(content);
+        const keywordEmbedding = await News.generateEmbeddingWithFastEmbedding(this._keywords.join(' '));
         if(embedding) {
-            this._embedding = Float32Array.from(embedding as Array<number>)
+            this._embedding = Float32Array.from([...Float32Array.from(embedding as Array<number>), ...Float32Array.from(keywordEmbedding as Array<number>)])
             logger.debug(`Embedding Length: ${embedding.length}`);
             return embedding;
         }
         return null
     }
 
-    public static async generateEmbedding(content: string): Promise<Float32Array | null> {
+    public static async generateStaticEmbedding(content: string, kind: 'passage' | 'query' = 'passage'): Promise<Float32Array | null> {
         logger.info('Generating embedding for news article content');
-        const embedding = await News.generateEmbeddingWithFastEmbedding(content);
+        logger.debug(`Content length: ${content.length}`)
+        const embedding = await News.generateEmbeddingWithFastEmbedding(content, kind);
         if(embedding) {
             const result = Float32Array.from(embedding as Array<number>)
             logger.debug(`Embedding Length: ${embedding.length}`);
@@ -186,10 +203,11 @@ class News {
     private removeHTMLTags(text: string) {
         const withoutTags = text.replace(/<[^>]*>?/gm, '');
         const withoutExtraSpaces = withoutTags.replace(/\s+/gm, ' ');
-        return withoutExtraSpaces;
+        const withoutQuotes = withoutExtraSpaces.replace(/"/g, '');
+        return withoutQuotes;
     }
 
-    private async scrapeContent() {
+    public async scrapeContent() {
         try {
             const response = await axios.get(this._url);
             const dom = new JSDOM(response.data, { url: this._url });
@@ -214,7 +232,6 @@ class News {
     private async saveToDB() {
         logger.info('Saving news article to DB');
         try {
-            await this.scrapeContent();
             const result = await new NewsModel(this.toJSON()).save();
             logger.info('News article saved to DB');
             return result;
@@ -259,7 +276,7 @@ class News {
         logger.info('Reading news...');
         try {
             const qdrantController = new QDrantController(QDRANT_URL)
-            const embeddedQuery = await News.generateEmbedding(query);
+            const embeddedQuery = await News.generateStaticEmbedding(query);
             logger.debug(`Embedded Query length: ${embeddedQuery?.length}`)
             logger.debug(`Embedded Query is array: ${Array.isArray(embeddedQuery)}`)
             if(!embeddedQuery) throw new Error('Error generating embedding for query');

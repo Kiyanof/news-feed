@@ -5,7 +5,7 @@ const QDRANT_CONFIG = {
 
     DEFAULTS: {
         COLLECTION: {
-            SIZE: 384, // Because of fast_embed.py model
+            SIZE: 384 * 2, // Because of fast_embed.py model (news title + news content + news keyword)
             DISTANCE: 'Cosine',
             ON_DISK_PAYLOAD: true,
             DATA_TYPE: 'Float32'
@@ -14,6 +14,7 @@ const QDRANT_CONFIG = {
         RELEVANT_DISTANCE: 0.5,
         RELEVANT_TOP: 10,
         RELEVANT_SOME_COUNT: 5,
+        RELEVANT_MIN_SCORE: 0.5,
 
         CHUNK_SIZE: 10,
         BATCH_SIZE: 10,

@@ -11,17 +11,21 @@ original_stdout = sys.stdout
 # Redirect stdout to null
 sys.stdout = open(os.devnull, 'w')
 
-def generate_embedding(text):
-    documents: List[str] = [
-        text,
-        "fastembed is supported by and maintained by Qdrant.",
+def generate_sentences_array(text, kind="passage"):
+    sentences = text.split(".")
+    sentences = [sentence.strip() for sentence in sentences if sentence.strip()]
+    sentences = [kind + ": " + sentence for sentence in sentences]
+    return sentences
+
+def generate_embedding(text, kind="passage"):
+    sentences = generate_sentences_array(text, kind)
+    documents: List[str] = sentences + [
+        "fastembed is supported by and maintained by Qdrant."
     ]
 
     # This will trigger the model download and initialization
-    embedding_model = TextEmbedding()
+    embedding_model = TextEmbedding("BAAI/bge-small-en-v1.5", device="cpu", batch_size=1, max_seq_length=384, verbose=False, use_tqdm=False)
     print("The model BAAI/bge-small-en-v1.5 is ready to use.")
-
-    embeddings_generator = embedding_model.embed(documents)  # reminder this is a generator
     embeddings_list = list(embedding_model.embed(documents))
 
     # Length of the embeddings = 384
@@ -31,7 +35,8 @@ def generate_embedding(text):
 
 if __name__ == "__main__":
     text = sys.argv[1]
-    embedding = generate_embedding(text).tolist()
+    kind = sys.argv[2] # "query" or "passage"
+    embedding = generate_embedding(text, kind).tolist()
     # Restore the original stdout
     sys.stdout = original_stdout
     print("---start---\n", embedding, "\n---end---", file=sys.stderr) 

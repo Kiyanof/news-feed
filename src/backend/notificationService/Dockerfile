@@ -20,4 +20,5 @@
     COPY --from=build /app/dist ./dist
     COPY --from=dependencies /app/node_modules ./node_modules
     EXPOSE 8003
-    CMD ["node", "dist/server.js"]
+
+

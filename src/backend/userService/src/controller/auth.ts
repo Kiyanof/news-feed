@@ -56,8 +56,7 @@ const signup = APIErrorHandler(async (req: Request, res: Response) => {
     frequency,
     prompt
   );
-  if (!isAdded)
-    throw new BrokerError("Failed to add user to subscription service");
+  if (!isAdded) throw new BrokerError("Failed to add user to subscription service");
 
   const newUser = await addNewUser(email, password, frequency, prompt);
 

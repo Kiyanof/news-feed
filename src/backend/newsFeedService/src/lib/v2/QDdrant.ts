@@ -8,6 +8,17 @@ import logger from "../../config/logger";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { v4 as uuidv4 } from "uuid";
 
+interface IPayload {
+  id: string;
+  publishedAt: number;
+}
+
+interface IDocument {
+  score: number;
+  id: string;
+  payload: IPayload;
+}
+
 class QDrantController {
   private _url: string;
   private _default: QDrantControllerDefaults;
@@ -271,17 +282,32 @@ class QDrantController {
     }
   }
 
+  private async filterRelevantDocuments(documents: Array<IDocument>) {
+    logger.defaultMeta = { Procedure: "filterRelevantDocuments" };
+    logger.info("Filtering relevant documents...");
+    try {
+      const result = documents.filter((document) => {
+        return document.score >= QDRANT_CONFIG.DEFAULTS.RELEVANT_MIN_SCORE;
+      });
+      logger.debug(`Result: ${result.length}`);
+      return result;
+    } catch (error) {
+      logger.error(`Error filtering relevant documents: ${error}`);
+      return null;
+    }
+  }
+
   async findRelevantDocuments(
     collection: string,
     query: Float32Array,
     top: number = this._default.relevantTop,
     frequency: "daily" | "weekly" | "monthly" = "daily"
-  ) {
+  ) : Promise<Array<IDocument> | null> {
     logger.defaultMeta = { Procedure: "findRelevantQuerys" };
     logger.info("Finding relevant querys...");
     try {
       const result = await this._client.search(`${collection}`, {
-        vector: Object.values(query),
+        vector: Object.values(Float32Array.from([...query, ...query])),
         filter: {
           should: [
             {
@@ -297,7 +323,7 @@ class QDrantController {
         limit: top,
       });
       logger.debug(`Result: ${result.length}`);
-      return result;
+      return this.filterRelevantDocuments(result);
     } catch (error) {
       logger.error(`Error finding relevant documents: ${error}`);
       return null;

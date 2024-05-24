@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
   application:
     container_name: application
     image: newsfeed-application
@@ -13,7 +12,6 @@ services:
       - subscriptionService
     networks:
       - app_network
-
 
   userService:
     container_name: userService
@@ -27,10 +25,17 @@ services:
       - rabbitmq
     volumes:
       - ./modules:/app/modules
+      - ./command:/app/command
     env_file:
       - ./backend/userService/.env
     networks:
       - app_network
+    command: 
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
 
   newsfeedService:
     container_name: newsfeed
@@ -44,11 +49,17 @@ services:
       - mongo
     volumes:
       - ./modules:/app/modules
+      - ./command:/app/command
     env_file:
       - ./backend/newsFeedService/.env
     networks:
       - app_network
-    
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
 
   contentService:
     container_name: content
@@ -60,10 +71,17 @@ services:
       - rabbitmq
     volumes:
       - ./modules:/app/modules
+      - ./command:/app/command
     env_file:
       - ./backend/contentService/.env
     networks:
       - app_network
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
 
   notificationService:
     container_name: notification
@@ -76,10 +94,17 @@ services:
       # - redis # Uncomment this line if you want to use redis for caching notification service
     volumes:
       - ./modules:/app/modules
+      - ./command:/app/command
     env_file:
       - ./backend/notificationService/.env
     networks:
       - app_network
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
 
   subscriptionService:
     container_name: subscriptionService
@@ -93,10 +118,17 @@ services:
       - mongo
     volumes:
       - ./modules:/app/modules
+      - ./command:/app/command
     env_file:
       - ./backend/subscriptionService/.env
     networks:
       - app_network
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
 
   nginx:
     container_name: nginx
@@ -147,9 +179,8 @@ volumes:
   qdrant_data:
   nginx.conf:
   modules:
-     
+  command:
 
 networks:
   app_network:
     driver: bridge
-  

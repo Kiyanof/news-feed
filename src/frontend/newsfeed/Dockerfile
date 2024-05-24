@@ -5,7 +5,7 @@
     
     # ---- Dependencies ----
     FROM base AS dependencies
-    RUN npm install --force
+    RUN npm install
     # later use npm CI
     
     # ---- Copy Files/Build ----

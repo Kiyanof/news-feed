@@ -1,4 +1,4 @@
-import DatabaseError from "src/error/DatabaseError";
+import DatabaseError from "../error/DatabaseError";
 import logger from "../config/logger";
 import NotFoundError from "../error/NotFoundError";
 import UserModel, { UserType } from "../model/user"
