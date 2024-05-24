@@ -1,0 +1,235 @@
+version: "3.8"
+
+services:
+  application:
+    container_name: application
+    image: newsfeed-application
+    build: ./frontend/newsfeed
+    ports:
+      - "3000:3000"
+    depends_on:
+      - userService
+      - subscriptionService
+    networks:
+      - app_network
+
+  userService:
+    container_name: userService
+    image: user-service
+    build: ./backend/userService
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    volumes:
+      - ./modules:/app/modules
+      - ./command:/app/command
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=${APP_PORT_USER}
+      - MONGO_NAME=${MONGO_NAME_USER}
+      - REDIS_DB=${REDIS_DB_USER}
+    networks:
+      - app_network
+    command: 
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
+
+  newsfeedService:
+    container_name: newsfeed
+    image: newsfeed-service
+    build: ./backend/newsFeedService
+    ports:
+      - "8005:8005"
+    depends_on:
+      - rabbitmq
+      - qdrant
+      - mongo
+    volumes:
+      - ./modules:/app/modules
+      - ./command:/app/command
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=${APP_PORT_NEWSFEED}
+      - MONGO_DB=${MONGO_DB_NEWSFEED}
+      - MONGO_USERNAME=${MONGO_USERNAME_NEWSFEED}
+      - MONGO_PASSWORD=${MONGO_PASSWORD_NEWSFEED}
+      - NEWS_EXPIRE=${NEWS_EXPIRE_NEWSFEED}
+      - NEWSDATA_API_KEY=${NEWSDATA_API_KEY_NEWSFEED}
+      - NEWSDATA_PATH=${NEWSDATA_PATH_NEWSFEED}
+      - NEWSDATA_ENDPOINT=${NEWSDATA_ENDPOINT_NEWSFEED}
+      - NEWSDATA_MAX=${NEWSDATA_MAX_NEWSFEED}
+      - NEWSDATA_ACTIVE=${NEWSDATA_ACTIVE_NEWSFEED}
+      - NEWSAPI_API_KEY=${NEWSAPI_API_KEY_NEWSFEED}
+      - NEWSAPI_PATH=${NEWSAPI_PATH_NEWSFEED}
+      - NEWSAPI_ENDPOINT=${NEWSAPI_ENDPOINT_NEWSFEED}
+      - NEWSAPI_MAX=${NEWSAPI_MAX_NEWSFEED}
+      - NEWSAPI_ACTIVE=${NEWSAPI_ACTIVE_NEWSFEED}
+      - GNEWS_API_KEY=${GNEWS_API_KEY_NEWSFEED}
+      - GNEWS_PATH=${GNEWS_PATH_NEWSFEED}
+      - GNEWS_ENDPOINT=${GNEWS_ENDPOINT_NEWSFEED}
+      - GNEWS_MAX=${GNEWS_MAX_NEWSFEED}
+      - GNEWS_ACTIVE=${GNEWS_ACTIVE_NEWSFEED}
+      - QDRANT_PROTOCOL=${QDRANT_PROTOCOL_NEWSFEED}
+      - QDRANT_HOST=${QDRANT_HOST_NEWSFEED}
+      - QDRANT_PORT=${QDRANT_PORT_NEWSFEED}
+      - RESET_NEWS=${RESET_NEWS_NEWSFEED}
+    networks:
+      - app_network
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
+
+  contentService:
+    container_name: content
+    image: content-service
+    build: ./backend/contentService
+    ports:
+      - "8002:8002"
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./modules:/app/modules
+      - ./command:/app/command
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=${APP_PORT_CONTENT}
+    networks:
+      - app_network
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
+
+  notificationService:
+    container_name: notification
+    image: notification-service
+    build: ./backend/notificationService
+    ports:
+      - "8003:8003"
+    depends_on:
+      - rabbitmq
+      # - redis # Uncomment this line if you want to use redis for caching notification service
+    volumes:
+      - ./modules:/app/modules
+      - ./command:/app/command
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=${APP_PORT_NOTIFICATION}
+      - EMAIL_SERVICE=${EMAIL_SERVICE_NOTIFICATION}
+      - EMAIL_USERNAME=${EMAIL_USERNAME_NOTIFICATION}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD_NOTIFICATION}
+    networks:
+      - app_network
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
+
+  subscriptionService:
+    container_name: subscriptionService
+    image: subscription-service
+    build: ./backend/subscriptionService
+    ports:
+      - "8004:8004"
+    depends_on:
+      - rabbitmq
+      - redis
+      - mongo
+    volumes:
+      - ./modules:/app/modules
+      - ./command:/app/command
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=${APP_PORT_SUBSCRIPTION}
+      - MONGO_NAME=${MONGO_NAME_SUBSCRIPTION}
+      - REDIS_USERNAME=${REDIS_USERNAME_SUBSCRIPTION}
+      - REDIS_PASSWORD=${REDIS_PASSWORD_SUBSCRIPTION}
+      - REDIS_DB=${REDIS_DB_SUBSCRIPTION}
+      - WHITELIST_PROTOCOL=${WHITELIST_PROTOCOL_SUBSCRIPTION}
+      - WHITELIST_HOST=${WHITELIST_HOST_SUBSCRIPTION}
+      - WHITELIST_PORT=${WHITELIST_PORT_SUBSCRIPTION}
+      - WHITELIST_USERNAME=${WHITELIST_USERNAME_SUBSCRIPTION}
+      - WHITELIST_PASSWORD=${WHITELIST_PASSWORD_SUBSCRIPTION}
+      - WHITELIST_DB=${WHITELIST_DB_SUBSCRIPTION}
+      - PARSE_PROMPT=${PARSE_PROMPT_SUBSCRIPTION}
+    networks:
+      - app_network
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh rabbitmq 5672 && node dist/server.js",
+      ]
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - app_network
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - app_network
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - app_network
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  qdrant:
+    container_name: qdrant
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+    networks:
+      - app_network
+
+volumes:
+  qdrant_data:
+  nginx.conf:
+  modules:
+  command:
+
+networks:
+  app_network:
+    driver: bridge
