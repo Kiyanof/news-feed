@@ -10,8 +10,17 @@ services:
     depends_on:
       - userService
       - subscriptionService
+      - nginx
     networks:
       - app_network
+    volumes:
+      - ./command:/app/command
+    command: 
+      [
+        "/bin/sh",
+        "-c",
+        "./command/waitForIt.sh nginx 80 && node_modules/.bin/next start",
+      ]
 
   userService:
     container_name: userService
