@@ -6,9 +6,9 @@ dirs=(
   "./../rabbitmq/"
   "./../tokenizer/"
   "./../producers/content/"
-  "./../producers/news/"
-  "./../producers/notification/"
-  "./../producers/subscription/"
+  "./../news/"
+  "./../notification/"
+  "./../subscription/"
 )
 
 for dir in "${dirs[@]}"; do
@@ -21,6 +21,9 @@ for dir in "${dirs[@]}"; do
     echo "$dir does not exist"
   fi
 done
+
+pwd # Print the current working directory
+cd ./../..
 
 services=("contentService" "userService" "newsFeedService" "notificationService" "subscriptionService")
 
