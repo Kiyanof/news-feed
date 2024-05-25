@@ -33,6 +33,7 @@ The News Feed Personalization and Subscription System is a cutting-edge platform
 
 2. **Set Up Environment Variables**:
     Create a `.env` file in the `/src` directory next to the docker-compose file and populate it with the required environment variables (see the Environment Variables section below).
+    For more details, refer to `index.pdf` in the `/doc` directory.
 
 3. **Configuration**:
     Rename `docker-compose-oneenv.yml` to `docker-compose.yml` in the `/src` directory to ensure only one `.env` file is needed.
@@ -55,6 +56,16 @@ The News Feed Personalization and Subscription System is a cutting-edge platform
     Go to the **Admin** tab and in the **Virtual Hosts** section, add a new vhost named `notificationVhost` with the stream type. 
 
     If you change the credentials or use a different name for the vhost, you must also update the relevant environment variables.
+
+6. **Restart Multi-Container App**:
+    After configuring RabbitMQ, restart the multi-container app:
+    ```bash
+    docker-compose restart newsfeed
+    ```
+    Or just restart the app from docker GUI application.
+
+7. **Enjoy the Platform**:
+    Now, you can enjoy the platform. Note that gathering news from different sources can take a long time, approximately 30 minutes, depending on the keywords, the number of news items to gather and save in the database from user prompts, and the maximum news environment variable number per each news source. Additionally, Qdrant FastEmbed may take some time to download the embedding model for the first time.    
 
 ## Environment Variables
 
